@@ -102,6 +102,7 @@ class mainFormDlg(QWidget) :
             self.currentGameId = int(game[0])
             self.currentGameName = game[1]
             self.currentCharId = int(character[0])
+            print("currentCharId: ",self.currentCharId)
             self.currentCharName = character[1]
             self.characterSheetButton.setText(character[1])
             self.playerStatus = 1

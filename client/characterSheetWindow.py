@@ -400,6 +400,7 @@ class mainFormDlg(QDialog) :
             # msg.buttonClicked.connect(self.ok)
             msg.exec_()
             print("error:",e)
+
     def updateAttackTable(self):
         self.attacksModel.clear()
         self.attacksModel.setHorizontalHeaderLabels(["Name","To Hit","Damage","Edit","Delete"])
@@ -456,6 +457,7 @@ class mainFormDlg(QDialog) :
                 cell = QStandardItem(str(item))
                 row.append(cell)
             self.attacksModel.appendRow(row)
+
     def editAttack(self, a):
         self.attackToEdit = self.attacksList[a][7]
         editWindow = editAttackWindow.mainFormDlg(self)
@@ -489,7 +491,6 @@ class mainFormDlg(QDialog) :
         finally:
             self.tcp_client.close()
 
-
     def newAttack(self):
         print("create new attack")
         newWindow = createAttackWindow.mainFormDlg(self)
@@ -510,12 +511,10 @@ class mainFormDlg(QDialog) :
             self.deleteAttack(a.row())
 
 
-
     def centerOnScreen(self):
         resolution = QDesktopWidget().screenGeometry()
         self.move((resolution.width() / 2) - (self.frameSize().width() / 2),
         (resolution.height() / 2) - (self.frameSize().height() / 2) )
-
 
     def defineBasicStats(self):
         self.strWidget = QWidget()
