@@ -130,7 +130,7 @@ class mainFormDlg(QWidget) :
             print(game)
             self.currentGameId = int(game[0])
             self.currentGameName = game[1]
-            self.characterSheetButton.setText(character[1])
+            # self.characterSheetButton.setText(character[1])
             self.playerStatus = 2
             self.updateGame()
             self.mainLayout.setCurrentIndex(2)
@@ -339,6 +339,8 @@ class mainFormDlg(QWidget) :
     def updateGame(self):
         print("update game")
         self.gameNameLabel.setText(self.currentGameName)
+        if(self.playerStatus == 2):
+            self.currentCharName = "DM"
         self.characterNameLabel.setText("Playing as: "+self.currentCharName)
 
     def updateJoinButton(self):

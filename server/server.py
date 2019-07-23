@@ -7,9 +7,9 @@ import pickle
 from random import randint
 
 ## Laptop
-# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd;Trusted_Connection=yes;')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd;Trusted_Connection=yes;')
 ## PC
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd;Trusted_Connection=yes;')
+# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd;Trusted_Connection=yes;')
 
 cursor = cnxn.cursor()
 
@@ -345,10 +345,10 @@ or more than """+str(maxNumberOfDice)+""" different dice.""")
                 from
                   Tbl_character
                 where
-                  user_ID = ?
+                  character_ID = ?
                 """
-                print(executeString, userId)
-                cursor.execute(executeString, userId)
+                print(executeString, self.data[3])
+                cursor.execute(executeString, self.data[3])
                 rows = cursor.fetchall()
                 for row in rows:
                     name = row[0]
