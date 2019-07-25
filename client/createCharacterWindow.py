@@ -86,6 +86,9 @@ class mainFormDlg(QDialog) :
         self.setWindowTitle('Create Character')
         self.centerOnScreen()
 
+        self.characterGame = self.parent().self.gameList[self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()][0]
+        print("cg", self.characterGame)
+
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.counterLabel = QLabel("You have 27 points left to spend.")

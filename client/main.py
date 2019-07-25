@@ -42,6 +42,7 @@ class mainFormDlg(QWidget) :
             self.charactersListBox.clear()
             gameId = self.gameList[self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()][0]
             self.joinGameButton.setEnabled(False)
+            self.deleteCharacterButton.setEnabled(False)
             self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.characterListFormatted = []
             self.characterList = []
@@ -68,6 +69,8 @@ class mainFormDlg(QWidget) :
         self.gamesListBox.clear()
         self.joinGameButton.setEnabled(False)
         self.joinGameDmButton.setEnabled(False)
+        self.createCharacterButton.setEnabled(False)
+        self.deleteCharacterButton.setEnabled(False)
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.gameListFormatted = []
         self.gameList = []
@@ -354,19 +357,27 @@ class mainFormDlg(QWidget) :
         try:
             if(self.charactersListBox.selectedItems()[0] and self.gamesListBox.selectedItems()[0]):
                 self.joinGameButton.setEnabled(True)
+                self.deleteCharacterButton.setEnabled(True)
         except:
             self.joinGameButton.setEnabled(False)
+            self.deleteCharacterButton.setEnabled(False)
 
     def updateJoinDmButton(self):
         self.updateJoinButton()
         self.updateCharacters()
         try:
-            if(self.gamesListBox.selectedItems()[0] and self.userId == self.gameList[self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()][3]):
-                self.joinGameDmButton.setEnabled(True)
+            if(self.gamesListBox.selectedItems()[0]):
+                self.createCharacterButton.setEnabled(True)
+                if(self.userId == self.gameList[self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()][3]):
+                    self.joinGameDmButton.setEnabled(True)
+                else:
+                    self.joinGameDmButton.setEnabled(False)
             else:
                 self.joinGameDmButton.setEnabled(False)
+                self.createCharacterButton.setEnabled(False)
         except:
             self.joinGameDmButton.setEnabled(False)
+            self.createCharacterButton.setEnabled(False)
 
 
     def centerOnScreen(self):
@@ -477,6 +488,7 @@ class mainFormDlg(QWidget) :
         self.createCharacterButton.clicked.connect(self.createCharacter)
         self.createGameButton.clicked.connect(self.createGame)
 
+        self.createCharacterButton.setEnabled(False)
 
         self.joinGameButton = QPushButton("Join game with character")
         self.joinGameButton.setEnabled(False)
