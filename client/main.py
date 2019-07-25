@@ -38,18 +38,22 @@ class mainFormDlg(QWidget) :
 
     # JOIN GAME STUFF
     def updateCharacters(self):
-        self.charactersListBox.clear()
-        self.joinGameButton.setEnabled(False)
-        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.characterListFormatted = []
-        self.characterList = []
-        print("updating characters")
-        data = [4,self.username,self.password,self.userId]
-        self.tcp_client.connect((self.host_ip, self.server_port))
-        self.tcp_client.sendall(pickle.dumps(data))
+        try:
+            self.charactersListBox.clear()
+            gameId = self.gameList[self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()][0]
+            self.joinGameButton.setEnabled(False)
+            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.characterListFormatted = []
+            self.characterList = []
+            print("updating characters")
+            data = [4,self.username,self.password,self.userId,gameId]
+            self.tcp_client.connect((self.host_ip, self.server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
 
-        received = pickle.loads(self.tcp_client.recv(1024))
-        self.tcp_client.close()
+            received = pickle.loads(self.tcp_client.recv(1024))
+            self.tcp_client.close()
+        except Exception as e:
+            print(e)
 
         for character in received:
             # self.characterListFormatted.append("id: "+str(character[0])+", "+str(character[1]))
@@ -76,6 +80,7 @@ class mainFormDlg(QWidget) :
         self.tcp_client.close()
 
         for game in received:
+            print(game)
             # self.characterListFormatted.append("id: "+str(character[0])+", "+str(character[1]))
             if(game[2]):
                 #  - locked
@@ -106,6 +111,7 @@ class mainFormDlg(QWidget) :
             self.currentCharName = character[1]
             self.characterSheetButton.setText(character[1])
             self.playerStatus = 1
+            self.gameRightWidget.setTabEnabled(1,True)
             self.updateGame()
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
@@ -132,6 +138,7 @@ class mainFormDlg(QWidget) :
             self.currentGameName = game[1]
             # self.characterSheetButton.setText(character[1])
             self.playerStatus = 2
+            self.gameRightWidget.setTabEnabled(1,False)
             self.updateGame()
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
@@ -258,7 +265,7 @@ class mainFormDlg(QWidget) :
                 # msg.buttonClicked.connect(self.ok)
                 self.setLoggedInText()
                 self.updateGames()
-                self.updateCharacters()
+                # self.updateCharacters()
                 self.mainLayout.setCurrentIndex(1)
             else:
                 msg.setText("Login failed")
@@ -352,9 +359,12 @@ class mainFormDlg(QWidget) :
 
     def updateJoinDmButton(self):
         self.updateJoinButton()
+        self.updateCharacters()
         try:
-            if(self.gamesListBox.selectedItems()[0]):
+            if(self.gamesListBox.selectedItems()[0] and self.userId == self.gameList[self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()][3]):
                 self.joinGameDmButton.setEnabled(True)
+            else:
+                self.joinGameDmButton.setEnabled(False)
         except:
             self.joinGameDmButton.setEnabled(False)
 

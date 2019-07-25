@@ -146,9 +146,9 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             print("RETURN USER'S CHARACTERS")
             characters = []
             try:
-                executeString = "select character_ID, name from Tbl_character where user_ID = ?"
-                print(executeString, self.data[3])
-                cursor.execute(executeString, self.data[3])
+                executeString = "select character_ID, name from Tbl_character where user_ID = ? and game_ID = ?"
+                print(executeString, self.data[3], self.data[4])
+                cursor.execute(executeString, self.data[3], self.data[4])
                 rows = cursor.fetchall()
                 for row in rows:
                     print(row)
@@ -161,7 +161,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             print("RETURN ALL GAMES")
             games = []
             try:
-                executeString = "select game_ID, name, password from Tbl_game"
+                executeString = "select game_ID, name, password, user_ID from Tbl_game"
                 print(executeString)
                 cursor.execute(executeString)
                 rows = cursor.fetchall()
@@ -171,7 +171,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
                         pw = 1
                     else:
                         pw = 0
-                    games.append([row[0],row[1],pw])
+                    games.append([row[0],row[1],pw,row[3]])
             except Exception as e:
                 print("error: " + str(e))
             self.request.sendall(pickle.dumps(games))
