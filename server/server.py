@@ -134,9 +134,9 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             print("CREATE CHARACTER")
             success = 0
             try:
-                executeString = "insert into Tbl_character (name, str,int,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,user_ID,race_ID,game_ID) values (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ?, ?, 1, 0, '', '', '', '', ?, ?, ?)"
+                executeString = "insert into Tbl_character (name, str,int,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,user_ID,race_ID,game_ID,class_ID) values (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ?, ?, 1, 0, '', '', '', '', ?, ?, ?, ?)"
                 print(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11], self.data[12], self.data[13])
-                cursor.execute(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11], self.data[12], self.data[13])
+                cursor.execute(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11], self.data[12], self.data[13], self.data[14])
                 cnxn.commit()
                 success = 1
             except Exception as e:

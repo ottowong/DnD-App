@@ -75,7 +75,9 @@ class mainFormDlg(QDialog) :
         index = self.raceEdit.currentIndex()
         characterRace = self.raceList[index][0]
 
-        data=[3,self.parent().username,self.parent().password,nameVar,strVar,intVar,dexVar,conVar,wisVar,chaVar,hpVar,self.parent().userId,characterRace,self.characterGame]
+        characterClass = self.classList[self.classEdit.currentIndex()][0]
+
+        data=[3,self.parent().username,self.parent().password,nameVar,strVar,intVar,dexVar,conVar,wisVar,chaVar,hpVar,self.parent().userId,characterRace,self.characterGame,characterClass]
 
         try:
             self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
