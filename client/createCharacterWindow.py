@@ -8,6 +8,8 @@ import time
 import socket
 import pickle
 
+from calculateAbilities import calcAbility
+
 class mainFormDlg(QDialog) :
 
     def raceChanged(self):
@@ -105,16 +107,22 @@ class mainFormDlg(QDialog) :
         return num - mod
 
     def valChanged(self):
-        self.counter = 27
-        self.counter -= self.calculateScoreCost(self.strEdit.value(), self.raceStrMod)
-        self.counter -= self.calculateScoreCost(self.intEdit.value(), self.raceIntMod)
-        self.counter -= self.calculateScoreCost(self.dexEdit.value(), self.raceDexMod)
-        self.counter -= self.calculateScoreCost(self.conEdit.value(), self.raceConMod)
-        self.counter -= self.calculateScoreCost(self.wisEdit.value(), self.raceWisMod)
-        self.counter -= self.calculateScoreCost(self.chaEdit.value(), self.raceChaMod)
+        if(self.initialised):
+            self.counter = 27
+            self.counter -= self.calculateScoreCost(self.strEdit.value(), self.raceStrMod)
+            self.counter -= self.calculateScoreCost(self.intEdit.value(), self.raceIntMod)
+            self.counter -= self.calculateScoreCost(self.dexEdit.value(), self.raceDexMod)
+            self.counter -= self.calculateScoreCost(self.conEdit.value(), self.raceConMod)
+            self.counter -= self.calculateScoreCost(self.wisEdit.value(), self.raceWisMod)
+            self.counter -= self.calculateScoreCost(self.chaEdit.value(), self.raceChaMod)
 
-        self.counterLabel.setText("You have "+str(self.counter)+" points left to spend.")
+            self.counterLabel.setText("You have "+str(self.counter)+" points left to spend.")
 
+            print(self.classList[self.classEdit.currentIndex()])
+            print(self.classList[self.classEdit.currentIndex()][2])
+            print(calcAbility(self.conEdit.value()))
+            hp = self.classList[self.classEdit.currentIndex()][2] + calcAbility(self.conEdit.value())
+            self.hpEdit.setValue(hp)
 
 
 
@@ -133,7 +141,7 @@ class mainFormDlg(QDialog) :
         self.setWindowIcon(QIcon('icon.png'))
         self.setWindowTitle('Create Character')
         self.centerOnScreen()
-
+        self.initialised = 0
         self.raceStrMod = 0
         self.raceDexMod = 0
         self.raceConMod = 0
@@ -148,6 +156,7 @@ class mainFormDlg(QDialog) :
         self.nameEdit = QLineEdit()
         self.raceEdit = QComboBox()
         self.classEdit = QComboBox()
+        self.classEdit.currentIndexChanged.connect(self.valChanged)
         # self.raceEdit.connect(self.raceChanged)
         self.raceEdit.currentIndexChanged.connect(self.raceChanged)
         self.strEdit = QSpinBox()
@@ -224,9 +233,6 @@ class mainFormDlg(QDialog) :
             # Close the connection
             self.tcp_client.close()
 
-
-
-
         self.submitButton = QPushButton("Create Character")
 
         self.submitButton.clicked.connect(self.finishClicked)
@@ -252,6 +258,8 @@ class mainFormDlg(QDialog) :
         self.mainLayout.addWidget(self.counterLabel)
         self.mainLayout.addWidget(self.submitButton)
 
+        self.initialised = 1
+        self.valChanged()
 
         self.setLayout(self.mainLayout)
 

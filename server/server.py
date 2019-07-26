@@ -672,14 +672,15 @@ VALUES
             success = 0
 
             try:
-                executeString = "select class_ID,class from Tbl_class"
+                executeString = "select class_ID,class,hitDie from Tbl_class"
                 cursor.execute(executeString)
                 rows = cursor.fetchall()
                 reply = []
                 for row in rows:
                     classId = row[0]
                     className = row[1]
-                    reply.append([classId, className])
+                    hitDie = row[2]
+                    reply.append([classId, className, hitDie])
 
                 print(reply)
             except Exception as e:
