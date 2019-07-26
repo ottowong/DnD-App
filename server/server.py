@@ -129,9 +129,9 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             print("CREATE CHARACTER")
             success = 0
             try:
-                executeString = "insert into Tbl_character (name, str,int,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,user_ID) values (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ?, ?, 1, 0, '', '', '', '', ?)"
-                print(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11])
-                cursor.execute(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11])
+                executeString = "insert into Tbl_character (name, str,int,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,user_ID,race_ID,game_ID) values (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ?, ?, 1, 0, '', '', '', '', ?, ?, ?)"
+                print(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11], self.data[12], self.data[13])
+                cursor.execute(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11], self.data[12], self.data[13])
                 cnxn.commit()
                 success = 1
             except Exception as e:
@@ -618,6 +618,32 @@ VALUES
 
 
         # just send back ACK for data arrival confirmation
+        elif(self.data[0] == 19):
+            print("GET RACES")
+            success = 0
+
+            try:
+                executeString = "select Race_ID,race,str,dex,con,int,wis,cha from Tbl_race"
+                cursor.execute(executeString)
+                rows = cursor.fetchall()
+                reply = []
+                for row in rows:
+                    raceId = row[0]
+                    race = row[1]
+                    raceStr = row[2]
+                    raceDex = row[3]
+                    raceCon = row[4]
+                    raceInt = row[5]
+                    raceWis = row[6]
+                    raceCha = row[7]
+                    reply.append([raceId, race, raceStr, raceDex, raceCon, raceInt, raceWis, raceCha])
+
+
+                print(reply)
+            except Exception as e:
+                print("error: " + str(e))
+            self.request.sendall(pickle.dumps(reply))
+
         else:
             print(self.data[0])
             self.request.sendall(pickle.dumps("message received"))

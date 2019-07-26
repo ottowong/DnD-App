@@ -164,8 +164,55 @@ class mainFormDlg(QDialog) :
     def survivalClicked(self):
         self.statRoll(self.survivalLabel.text(), "Survival")
 
+    def checkLevel(self):
+        xp = self.xpEdit.value()
+        print(xp)
+
+        if(xp >= 355000):
+            lvl = 20
+        elif(xp >= 305000):
+            lvl = 19
+        elif(xp >= 265000):
+            lvl = 18
+        elif(xp >= 225000):
+            lvl = 17
+        elif(xp >= 195000):
+            lvl = 16
+        elif(xp >= 165000):
+            lvl = 15
+        elif(xp >= 140000):
+            lvl = 14
+        elif(xp >= 120000):
+            lvl = 13
+        elif(xp >= 100000):
+            lvl = 12
+        elif(xp >= 85000):
+            lvl = 11
+        elif(xp >= 64000):
+            lvl = 10
+        elif(xp >= 48000):
+            lvl = 9
+        elif(xp >= 34000):
+            lvl = 8
+        elif(xp >= 23000):
+            lvl = 7
+        elif(xp >= 14000):
+            lvl = 6
+        elif(xp >= 6500):
+            lvl = 5
+        elif(xp >= 2700):
+            lvl = 4
+        elif(xp >= 900):
+            lvl = 3
+        elif(xp >= 300):
+            lvl = 2
+        else:
+            lvl = 1
+        self.levelEdit.setValue(lvl)
+
     def updateLabels(self):
         if(self.initialised):
+            self.checkLevel()
             self.setWindowTitle(self.charName)
             self.characterNameLabel.setText(self.charName)
 
@@ -1335,8 +1382,11 @@ class mainFormDlg(QDialog) :
         self.levelEdit = QSpinBox()
         self.levelEdit.valueChanged.connect(self.updateLabels)
         self.levelEdit.setMinimum(1)
+        self.levelEdit.setMaximum(20)
         self.levelEdit.setMinimumWidth(100)
         self.xpEdit = QSpinBox()
+        self.xpEdit.setMaximum(355000)
+        self.xpEdit.valueChanged.connect(self.updateLabels)
         self.levelLayout.addRow("Level",self.levelEdit)
         self.levelLayout.addRow("XP",self.xpEdit)
 
