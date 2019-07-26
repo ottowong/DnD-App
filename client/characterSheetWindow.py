@@ -166,8 +166,6 @@ class mainFormDlg(QDialog) :
 
     def checkLevel(self):
         xp = self.xpEdit.value()
-        print(xp)
-
         if(xp >= 355000):
             lvl = 20
         elif(xp >= 305000):

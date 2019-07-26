@@ -109,17 +109,22 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             print("CREATE GAME")
             success = 0
             try:
-                executeString = "insert into Tbl_game (name, password) values (?, ?)"
-                cursor.execute(executeString, self.data[3], self.data[4])
-                cnxn.commit()
-                cursor.execute("SELECT TOP 1 * FROM Tbl_game ORDER BY game_ID DESC")
+                executeString = "select user_ID from Tbl_user where username = ? and password = ?"
+                cursor.execute(executeString, self.data[1], self.data[2])
                 rows = cursor.fetchall()
                 for row in rows:
-                    print(row)
-                    gameId = row[0]
-
-                cursor.execute("insert into Tbl_gameUser (game_ID, user_ID, isDm) values ("+str(gameId)+","+str(self.data[5])+",1)")
+                    userId = row[0]
+                executeString = "insert into Tbl_game (name, password, user_ID) values (?, ?, ?)"
+                cursor.execute(executeString, self.data[3], self.data[4], userId)
                 cnxn.commit()
+                # cursor.execute("SELECT TOP 1 * FROM Tbl_game ORDER BY game_ID DESC")
+                # rows = cursor.fetchall()
+                # for row in rows:
+                    # print(row)
+                    # gameId = row[0]
+
+                # cursor.execute("insert into Tbl_gameUser (game_ID, user_ID, isDm) values ("+str(gameId)+","+str(self.data[5])+",1)")
+                # cnxn.commit()
                 success = 1
             except Exception as e:
                 print("error: " + str(e))
@@ -643,6 +648,24 @@ VALUES
             except Exception as e:
                 print("error: " + str(e))
             self.request.sendall(pickle.dumps(reply))
+
+        elif(self.data[0] == 20):
+            print("DELETE GAME")
+            success = 0
+
+            try:
+                executeString = "select user_ID from Tbl_user where username = ? and password = ?"
+                cursor.execute(executeString, self.data[1], self.data[2])
+                rows = cursor.fetchall()
+                for row in rows:
+                    userId = row[0]
+                executeString = "delete from Tbl_game where game_ID = ? and user_ID = ?"
+                cursor.execute(executeString, self.data[3], userId)
+                cnxn.commit()
+                success = 1
+            except Exception as e:
+                print("error: " + str(e))
+            self.request.sendall(pickle.dumps([success]))
 
         else:
             print(self.data[0])

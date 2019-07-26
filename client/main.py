@@ -69,6 +69,7 @@ class mainFormDlg(QWidget) :
         self.gamesListBox.clear()
         self.joinGameButton.setEnabled(False)
         self.joinGameDmButton.setEnabled(False)
+        self.deleteGameButton.setEnabled(False)
         self.createCharacterButton.setEnabled(False)
         self.deleteCharacterButton.setEnabled(False)
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -85,12 +86,20 @@ class mainFormDlg(QWidget) :
         for game in received:
             print(game)
             # self.characterListFormatted.append("id: "+str(character[0])+", "+str(character[1]))
+            gameStartString = ""
+            if(game[3] == self.userId):
+                gameStartString += "DM "
+            else:
+                gameStartString += "        "
             if(game[2]):
                 #  - locked
-                self.gameListFormatted.append("* "+str(game[1])+"")
+                gameStartString += "* "
             else:
                 #  - unlocked
-                self.gameListFormatted.append("  "+str(game[1])+"")
+                gameStartString += "   "
+            self.gameListFormatted.append(gameStartString+str(game[1])+"")
+
+
             self.gameList.append(game)
             game[0] = str(game[0])
 
@@ -128,6 +137,19 @@ class mainFormDlg(QWidget) :
             # msg.buttonClicked.connect(self.ok)
             msg.exec_()
             print("error:",e)
+
+    def deleteGame(self):
+        print("delete game")
+        index = ((self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()))
+        msg = QMessageBox.question(self, "Confirm", "Are you sure you want to delete "+str(self.gameList[index][1])+"?", QMessageBox.Yes|QMessageBox.No)
+        print(self.gameList[index])
+        # msg.setText("Are you sure you want to delete "+str(self.characterList[index][1])+"?")
+        # msg.setInformativeText("")
+        # msg.setWindowTitle("Confirm")
+        # msg.setDetailedText(errorString)
+        if(msg == QMessageBox.Yes):
+            self.delGame()
+        # msg.exec_()
 
     def joinGameDmButtonClicked(self):
 
@@ -325,6 +347,32 @@ class mainFormDlg(QWidget) :
         finally:
 
             self.tcp_client.close()
+    def delGame(self):
+        index = ((self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()))
+        data = [20, self.username,self.password,self.gameList[index][0]]
+        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            # Establish connection to TCP server and exchange data
+            self.tcp_client.connect((self.host_ip, self.server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
+
+            # Read data from the TCP server and close the connection
+            received = pickle.loads(self.tcp_client.recv(1024))
+            print("received:",received)
+            msg = QMessageBox(self)
+            if(received[0] == 1):
+                self.updateGames()
+            else:
+                msg.setText("Delete failed!")
+                msg.setInformativeText("Please try again")
+                msg.setWindowTitle("failure")
+                msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                # msg.buttonClicked.connect(self.ok)
+                msg.exec_()
+
+        finally:
+
+            self.tcp_client.close()
 
     def deleteCharacter(self):
         index = ((self.charactersListBox.indexFromItem(self.charactersListBox.selectedItems()[0]).row()))
@@ -370,13 +418,17 @@ class mainFormDlg(QWidget) :
                 self.createCharacterButton.setEnabled(True)
                 if(self.userId == self.gameList[self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()][3]):
                     self.joinGameDmButton.setEnabled(True)
+                    self.deleteGameButton.setEnabled(True)
                 else:
                     self.joinGameDmButton.setEnabled(False)
+                    self.deleteGameButton.setEnabled(False)
             else:
                 self.joinGameDmButton.setEnabled(False)
+                self.deleteGameButton.setEnabled(False)
                 self.createCharacterButton.setEnabled(False)
         except:
             self.joinGameDmButton.setEnabled(False)
+            self.deleteGameButton.setEnabled(False)
             self.createCharacterButton.setEnabled(False)
 
 
@@ -482,11 +534,13 @@ class mainFormDlg(QWidget) :
         # self.charactersTitle
 
         self.createGameButton = QPushButton("Create Game")
+        self.deleteGameButton = QPushButton("Delete Game")
         self.createCharacterButton = QPushButton("Create Character")
         self.deleteCharacterButton = QPushButton("Delete Character")
         self.deleteCharacterButton.clicked.connect(self.deleteCharacter)
         self.createCharacterButton.clicked.connect(self.createCharacter)
         self.createGameButton.clicked.connect(self.createGame)
+        self.deleteGameButton.clicked.connect(self.deleteGame)
 
         self.createCharacterButton.setEnabled(False)
 
@@ -497,6 +551,7 @@ class mainFormDlg(QWidget) :
 
         self.joinGameDmButton = QPushButton("Join game as DM")
         self.joinGameDmButton.setEnabled(False)
+        self.deleteGameButton.setEnabled(False)
 
         self.joinGameDmButton.clicked.connect(self.joinGameDmButtonClicked)
 
@@ -512,6 +567,7 @@ class mainFormDlg(QWidget) :
         self.menuLeftLayout.addWidget(self.gamesTitle)
         self.menuLeftLayout.addWidget(self.gamesListBox)
         self.menuLeftLayout.addWidget(self.createGameButton)
+        self.menuLeftLayout.addWidget(self.deleteGameButton)
         self.menuLeftLayout.addWidget(self.joinGameDmButton)
 
         self.menuRightLayout.addWidget(self.charactersTitle)
