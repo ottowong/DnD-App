@@ -134,9 +134,26 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             print("CREATE CHARACTER")
             success = 0
             try:
-                executeString = "insert into Tbl_character (name, str,int,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,user_ID,race_ID,game_ID,class_ID) values (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ?, ?, 1, 0, '', '', '', '', ?, ?, ?, ?)"
-                print(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11], self.data[12], self.data[13])
-                cursor.execute(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], self.data[10], self.data[10], self.data[11], self.data[12], self.data[13], self.data[14])
+                executeString = "select primaryStr,primaryInt,primaryDex,primaryCon,primaryWis,primaryCha,savStr,savDex,savCon,savInt,savWis,savCha from Tbl_class where class_ID = ?"
+                cursor.execute(executeString,self.data[14])
+                rows = cursor.fetchall()
+                for row in rows:
+                    # primaryStr = row[0]
+                    # primaryInt = row[1]
+                    # primaryDex = row[2]
+                    # primaryCon = row[3]
+                    # primaryWis = row[4]
+                    # primaryCha = row[5]
+                    savStr = row[6]
+                    savInt = row[7]
+                    savDex = row[8]
+                    savCon = row[9]
+                    savWis = row[10]
+                    savCha = row[11]
+
+                executeString = "insert into Tbl_character (name, str,int,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,user_ID,race_ID,game_ID,class_ID) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ?, ?, 1, 0, '', '', '', '', ?, ?, ?, ?)"
+                print(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], savStr, savInt, savDex, savCon, savWis, savCha ,self.data[10], self.data[10], self.data[11], self.data[12], self.data[13], self.data[14])
+                cursor.execute(executeString, self.data[3], self.data[4], self.data[5], self.data[6], self.data[7], self.data[8], self.data[9], savStr, savInt, savDex, savCon, savWis, savCha, self.data[10], self.data[10], self.data[11], self.data[12], self.data[13], self.data[14])
                 cnxn.commit()
                 success = 1
             except Exception as e:
@@ -677,10 +694,7 @@ VALUES
                 rows = cursor.fetchall()
                 reply = []
                 for row in rows:
-                    classId = row[0]
-                    className = row[1]
-                    hitDie = row[2]
-                    reply.append([classId, className, hitDie])
+                    reply.append([row[0], row[1], row[2]])
 
                 print(reply)
             except Exception as e:
@@ -690,12 +704,6 @@ VALUES
         else:
             print(self.data[0])
             self.request.sendall(pickle.dumps("message received"))
-
-
-
-
-
-
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 42069

@@ -24,6 +24,13 @@ class mainFormDlg(QDialog) :
         self.wisEdit.setMinimum(8)
         self.chaEdit.setMinimum(8)
 
+        self.strEdit.setMaximum(17)
+        self.intEdit.setMaximum(17)
+        self.dexEdit.setMaximum(17)
+        self.conEdit.setMaximum(17)
+        self.wisEdit.setMaximum(17)
+        self.chaEdit.setMaximum(17)
+
         self.strEdit.setValue(self.strEdit.value() - self.raceStrMod)
         self.intEdit.setValue(self.intEdit.value() - self.raceIntMod)
         self.dexEdit.setValue(self.dexEdit.value() - self.raceDexMod)
@@ -53,6 +60,13 @@ class mainFormDlg(QDialog) :
         self.conEdit.setMinimum(8 + self.raceConMod)
         self.wisEdit.setMinimum(8 + self.raceWisMod)
         self.chaEdit.setMinimum(8 + self.raceChaMod)
+
+        self.strEdit.setMaximum(15 + self.raceStrMod)
+        self.intEdit.setMaximum(15 + self.raceIntMod)
+        self.dexEdit.setMaximum(15 + self.raceDexMod)
+        self.conEdit.setMaximum(15 + self.raceConMod)
+        self.wisEdit.setMaximum(15 + self.raceWisMod)
+        self.chaEdit.setMaximum(15 + self.raceChaMod)
 
         self.valChanged()
 
