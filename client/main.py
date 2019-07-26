@@ -53,16 +53,17 @@ class mainFormDlg(QWidget) :
 
             received = pickle.loads(self.tcp_client.recv(1024))
             self.tcp_client.close()
+            for character in received:
+                # self.characterListFormatted.append("id: "+str(character[0])+", "+str(character[1]))
+                self.characterListFormatted.append(str(character[1]))
+                self.characterList.append(character)
+                character[0] = str(character[0])
+                self.charactersListBox.addItems(self.characterListFormatted)
         except Exception as e:
             print(e)
 
-        for character in received:
-            # self.characterListFormatted.append("id: "+str(character[0])+", "+str(character[1]))
-            self.characterListFormatted.append(str(character[1]))
-            self.characterList.append(character)
-            character[0] = str(character[0])
 
-        self.charactersListBox.addItems(self.characterListFormatted)
+
         print("updated characters")
 
     def updateGames(self):
@@ -362,6 +363,7 @@ class mainFormDlg(QWidget) :
             msg = QMessageBox(self)
             if(received[0] == 1):
                 self.updateGames()
+                self.updateCharacters()
             else:
                 msg.setText("Delete failed!")
                 msg.setInformativeText("Please try again")

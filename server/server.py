@@ -7,7 +7,7 @@ import pickle
 from random import randint
 
 ## Laptop
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd;Trusted_Connection=yes;')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 ## PC
 # cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd;Trusted_Connection=yes;')
 
@@ -628,7 +628,7 @@ VALUES
             success = 0
 
             try:
-                executeString = "select Race_ID,race,str,dex,con,int,wis,cha from Tbl_race"
+                executeString = "select race_ID,race,str,dex,con,int,wis,cha from Tbl_race"
                 cursor.execute(executeString)
                 rows = cursor.fetchall()
                 reply = []
@@ -666,6 +666,25 @@ VALUES
             except Exception as e:
                 print("error: " + str(e))
             self.request.sendall(pickle.dumps([success]))
+
+        elif(self.data[0] == 21):
+            print("GET CLASSES")
+            success = 0
+
+            try:
+                executeString = "select class_ID,class from Tbl_class"
+                cursor.execute(executeString)
+                rows = cursor.fetchall()
+                reply = []
+                for row in rows:
+                    classId = row[0]
+                    className = row[1]
+                    reply.append([classId, className])
+
+                print(reply)
+            except Exception as e:
+                print("error: " + str(e))
+            self.request.sendall(pickle.dumps(reply))
 
         else:
             print(self.data[0])

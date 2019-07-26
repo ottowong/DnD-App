@@ -72,7 +72,7 @@ class mainFormDlg(QDialog) :
         print(self.parent().attackToEdit)
 
         self.setWindowIcon(QIcon('icon.png'))
-        self.setWindowTitle('dnd app')
+        self.setWindowTitle('Editing Attack')
         self.centerOnScreen()
 
         self.mainLayout = QVBoxLayout()

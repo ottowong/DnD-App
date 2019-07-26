@@ -12,6 +12,16 @@ class mainFormDlg(QDialog) :
 
     def raceChanged(self):
         print("change race")
+
+        print(self.raceStrMod)
+
+        self.strEdit.setMinimum(8)
+        self.intEdit.setMinimum(8)
+        self.dexEdit.setMinimum(8)
+        self.conEdit.setMinimum(8)
+        self.wisEdit.setMinimum(8)
+        self.chaEdit.setMinimum(8)
+
         self.strEdit.setValue(self.strEdit.value() - self.raceStrMod)
         self.intEdit.setValue(self.intEdit.value() - self.raceIntMod)
         self.dexEdit.setValue(self.dexEdit.value() - self.raceDexMod)
@@ -35,6 +45,13 @@ class mainFormDlg(QDialog) :
         self.wisEdit.setValue(self.wisEdit.value() + self.raceWisMod)
         self.chaEdit.setValue(self.chaEdit.value() + self.raceChaMod)
 
+        self.strEdit.setMinimum(8 + self.raceStrMod)
+        self.intEdit.setMinimum(8 + self.raceIntMod)
+        self.dexEdit.setMinimum(8 + self.raceDexMod)
+        self.conEdit.setMinimum(8 + self.raceConMod)
+        self.wisEdit.setMinimum(8 + self.raceWisMod)
+        self.chaEdit.setMinimum(8 + self.raceChaMod)
+
         self.valChanged()
 
 
@@ -52,7 +69,9 @@ class mainFormDlg(QDialog) :
         wisVar = (self.wisEdit.value())
         chaVar = (self.chaEdit.value())
         hpVar = (self.hpEdit.value())
-        characterRace = 1
+
+        index = self.raceEdit.currentIndex()
+        characterRace = self.raceList[index][0]
 
         data=[3,self.parent().username,self.parent().password,nameVar,strVar,intVar,dexVar,conVar,wisVar,chaVar,hpVar,self.parent().userId,characterRace,self.characterGame]
 
@@ -77,9 +96,9 @@ class mainFormDlg(QDialog) :
             self.close()
 
     def calculateScoreCost(self, num, mod):
-        if(num == 14):
+        if(num == 14 + mod):
             num = num - 7
-        elif(num == 15):
+        elif(num == 15 + mod):
             num = num - 6
         else:
             num = num - 8
@@ -124,12 +143,11 @@ class mainFormDlg(QDialog) :
 
         self.characterGame = self.parent().gameList[self.parent().gamesListBox.indexFromItem(self.parent().gamesListBox.selectedItems()[0]).row()][0]
 
-        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         self.counterLabel = QLabel("You have 27 points left to spend.")
 
         self.nameEdit = QLineEdit()
         self.raceEdit = QComboBox()
+        self.classEdit = QComboBox()
         # self.raceEdit.connect(self.raceChanged)
         self.raceEdit.currentIndexChanged.connect(self.raceChanged)
         self.strEdit = QSpinBox()
@@ -161,10 +179,9 @@ class mainFormDlg(QDialog) :
         self.wisEdit.valueChanged.connect(self.valChanged)
         self.chaEdit.valueChanged.connect(self.valChanged)
 
-
-        data=[19,self.parent().username,self.parent().password]
-
         try:
+            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            data=[19,self.parent().username,self.parent().password]
             # Establish connection to TCP server and exchange data
             self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
             self.tcp_client.sendall(pickle.dumps(data))
@@ -177,13 +194,38 @@ class mainFormDlg(QDialog) :
                 self.raceList.append(race)
                 self.raceEdit.addItem(race[1])
             print(self.raceList)
-            self.raceChanged()
+            # self.raceChanged()
 
         except Exception as e:
             print("ERROR: ",e)
         finally:
             # Close the connection
             self.tcp_client.close()
+
+        try:
+            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            data=[21,self.parent().username,self.parent().password]
+            # Establish connection to TCP server and exchange data
+            self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
+
+            # Read data from the TCP server
+            received = pickle.loads(self.tcp_client.recv(1024))
+            self.classList = []
+            print("received",received)
+            for clas in received:
+                self.classList.append(clas)
+                self.classEdit.addItem(clas[1])
+            print(self.classList)
+
+        except Exception as e:
+            print("ERROR: ",e)
+        finally:
+            # Close the connection
+            self.tcp_client.close()
+
+
+
 
         self.submitButton = QPushButton("Create Character")
 
@@ -199,6 +241,7 @@ class mainFormDlg(QDialog) :
 
         self.mainLayout.addRow("Character Name", self.nameEdit)
         self.mainLayout.addRow("Race", self.raceEdit)
+        self.mainLayout.addRow("Class", self.classEdit)
         self.mainLayout.addRow("STR",self.strEdit)
         self.mainLayout.addRow("INT",self.intEdit)
         self.mainLayout.addRow("DEX",self.dexEdit)
