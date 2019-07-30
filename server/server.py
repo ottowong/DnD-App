@@ -7,9 +7,9 @@ import pickle
 from random import randint
 
 ## Laptop
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 ## PC
-# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd;Trusted_Connection=yes;')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 
 cursor = cnxn.cursor()
 
@@ -216,6 +216,22 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
 
         elif(self.data[0] == 9):
             print("MANAGE CHAT MESSAGES")
+            helpstring = ("""format your messages in the format:
+            !r[number of dice]d[number of sides]
+            for example:
+                !r1d20
+                you can also add a modifier or roll
+                multiple dice by adding:
+                +[number]
+                or
+                +[number of dice]d[number of sides]
+                to the end of your message. e.g.
+                !r1d20+2d6+5
+                do not roll more than """+str(maxNumberOfRolls)+""" dice
+                with more than """+str(maxSides)+""" sides
+                with a modifier greater than """+str(maxModifier)+"""
+                or more than """+str(maxNumberOfDice)+""" different dice.""")
+
             reply = 0
             message = self.data[3]
 
@@ -224,68 +240,78 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             maxNumberOfDice = 10
             maxSides = 1000
 
-            helpstring = ("""format your messages in the format:
-!r[number of dice]d[number of sides]
-for example:
-!r1d20
-you can also add a modifier or roll
-multiple dice by adding:
-+[number]
-or
-+[number of dice]d[number of sides]
-to the end of your message. e.g.
-!r1d20+2d6+5
-do not roll more than """+str(maxNumberOfRolls)+""" dice
-with more than """+str(maxSides)+""" sides
-with a modifier greater than """+str(maxModifier)+"""
-or more than """+str(maxNumberOfDice)+""" different dice.""")
-
-
-
             counter = 0
             invalid = False
-            if(str.lower(str(message).replace(" ","")) == "!rhelp"):
-                reply = 1
-                self.request.sendall(pickle.dumps([reply,helpstring]))
-            elif(str.lower(message).startswith("!r")):
-                try:
+            # check if the user's message begins with "!r"
+            if(str.lower(message).startswith("!r")):
+                # check if the user has sent the help command
+                if(str.lower(str(message).replace(" ","")) == "!rhelp"):
                     reply = 1
-                    messagestring = str.lower(message)
-                    if(messagestring == "!r"):
-                        messagestring = "!r1d20"
-                    rollstring = ("DICE: "+str(self.data[1])+" rolled: ")
-                    rollsList = messagestring[2:].split("+")
-                    for i in range(0,len(rollsList)):
-                        rollsList[i] = rollsList[i].split("d")
-                    if(len(rollsList) > maxNumberOfDice):
-                        invalid = True
-                    else:
+                    self.request.sendall(pickle.dumps([reply,helpstring]))
+                else:
+                    try:
+                        reply = 1
+                        messagestring = str.lower(message)
+                        # "!r" is a shortcut for "!r1d20"
+                        if(messagestring == "!r"):
+                            messagestring = "!r1d20"
+                        # start off the message with the name of the user
+                        rollstring = ("DICE: "+str(self.data[1])+" rolled: ")
+                        # remove the "!r" from the beginning of the message and split the string into a list of individual dice
+                        # e.g. ["!r1d20+2d6+2"] will become:
+                        # ["1d20","2d6","2"]
+                        rollsList = messagestring[2:].split("+")
+                        # loop for each die
                         for i in range(0,len(rollsList)):
-                            if(len(rollsList[i]) == 2):
-                                if(int(rollsList[i][0]) <= maxNumberOfRolls and int(rollsList[i][1]) <= maxSides):
-                                    rollstring += "\n"+str(rollsList[i][0])+" d"+str(rollsList[i][1])+":"
-                                    for a in range(0, int(rollsList[i][0])):
-
-                                        rando = (randint(1, int(rollsList[i][1])))
-                                        counter += rando
-                                        if (a != 0):
-                                            rollstring += ","
-                                        rollstring += " "+str(rando)
+                            # split each die into a nested list with the number of dice and number of sides
+                            # e.g.  ["1d20","2d6","2"] will become:
+                            # [["1",20],["2","6"],"2"]
+                            rollsList[i] = rollsList[i].split("d")
+                        # make sure that the number of rolls does not exceed the maximum
+                        if(len(rollsList) > maxNumberOfDice):
+                            invalid = True
+                        else:
+                            for i in range(0,len(rollsList)):
+                                # if the list item is a roll (not a modifier), run the following code.
+                                if(len(rollsList[i]) == 2):
+                                    # make sure that the number of rolls and sides does not exceed the maximum
+                                    if(int(rollsList[i][0]) <= maxNumberOfRolls and int(rollsList[i][1]) <= maxSides):
+                                        # add the current dice being rolled to the message
+                                        rollstring += "\n"+str(rollsList[i][0])+" d"+str(rollsList[i][1])+":"
+                                        # loop for each roll with the current die
+                                        # e.g. 2d6 will loop twice
+                                        for a in range(0, int(rollsList[i][0])):
+                                            # generate a random integer between 1 and the number of sides on the die
+                                            rando = (randint(1, int(rollsList[i][1])))
+                                            counter += rando
+                                            # add the results to the message
+                                            if (a != 0):
+                                                rollstring += ","
+                                            rollstring += " "+str(rando)
+                                    else:
+                                        invalid = True
+                                # if the list item is a modifier (not a roll), run the following code
+                                elif(len(rollsList[i]) == 1):
+                                    # make sure the modifier does not exceed the maximum
+                                    if (int(rollsList[i][0]) > maxModifier):
+                                        invalid = True
+                                    else:
+                                        # add the modifier to the total and to the message
+                                        counter += int(rollsList[i][0])
+                                        rollstring += "\n+ "+str(rollsList[i][0])
+                                # this should never happen
                                 else:
                                     invalid = True
-                            elif(len(rollsList[i]) == 1):
-                                if (int(rollsList[i][0]) > maxModifier):
-                                    invalid = True
-                                else:
-                                    counter += int(rollsList[i][0])
-                                    rollstring += "\n+ "+str(rollsList[i][0])
-                    if(invalid == False):
-                        rollstring += "\nresulting in: **"+str(counter)+"**"
-                        self.request.sendall(pickle.dumps([reply,rollstring]))
-                    else:
-                        self.request.sendall(pickle.dumps([reply,"invalid input\nType:\n```!r help```\nfor help"]))
-                except Exception as e:
-                    self.request.sendall(pickle.dumps([reply,"invalid input: "+str(e)+"\nType:\n```!r help```\nfor help"]))
+                        if(invalid == False):
+                            # add the final result to the message, and send the message
+                            rollstring += "\nresulting in: **"+str(counter)+"**"
+                            self.request.sendall(pickle.dumps([reply,rollstring]))
+                        else:
+                            # send an error message back if there is invalid input without the code breaking
+                            self.request.sendall(pickle.dumps([reply,"invalid input\nType:\n```!r help```\nfor help"]))
+                    except Exception as e:
+                        # send an error message back if the code breaks
+                        self.request.sendall(pickle.dumps([reply,"invalid input: "+str(e)+"\nType:\n```!r help```\nfor help"]))
             else:
                 self.request.sendall(pickle.dumps([False]))
 

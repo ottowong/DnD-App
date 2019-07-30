@@ -13,10 +13,7 @@ from calculateAbilities import calcAbility
 class mainFormDlg(QDialog) :
 
     def raceChanged(self):
-        print("change race")
-
-        print(self.raceStrMod)
-
+        # set minimum value to 8 temporarily so that values can be decreased if needed
         self.strEdit.setMinimum(8)
         self.intEdit.setMinimum(8)
         self.dexEdit.setMinimum(8)
@@ -24,6 +21,7 @@ class mainFormDlg(QDialog) :
         self.wisEdit.setMinimum(8)
         self.chaEdit.setMinimum(8)
 
+        # set minimum value to 17 temporarily so that values can be increased if needed
         self.strEdit.setMaximum(17)
         self.intEdit.setMaximum(17)
         self.dexEdit.setMaximum(17)
@@ -31,6 +29,7 @@ class mainFormDlg(QDialog) :
         self.wisEdit.setMaximum(17)
         self.chaEdit.setMaximum(17)
 
+        # subtract the previous racial modifiers from each box
         self.strEdit.setValue(self.strEdit.value() - self.raceStrMod)
         self.intEdit.setValue(self.intEdit.value() - self.raceIntMod)
         self.dexEdit.setValue(self.dexEdit.value() - self.raceDexMod)
@@ -38,6 +37,7 @@ class mainFormDlg(QDialog) :
         self.wisEdit.setValue(self.wisEdit.value() - self.raceWisMod)
         self.chaEdit.setValue(self.chaEdit.value() - self.raceChaMod)
 
+        # set variables to the new selected race
         index = self.raceEdit.currentIndex()
         print(self.raceList[index])
         self.raceStrMod = self.raceList[index][2]
@@ -47,6 +47,7 @@ class mainFormDlg(QDialog) :
         self.raceWisMod = self.raceList[index][6]
         self.raceChaMod = self.raceList[index][7]
 
+        # add the new racial modifiers to each box
         self.strEdit.setValue(self.strEdit.value() + self.raceStrMod)
         self.intEdit.setValue(self.intEdit.value() + self.raceIntMod)
         self.dexEdit.setValue(self.dexEdit.value() + self.raceDexMod)
@@ -54,6 +55,7 @@ class mainFormDlg(QDialog) :
         self.wisEdit.setValue(self.wisEdit.value() + self.raceWisMod)
         self.chaEdit.setValue(self.chaEdit.value() + self.raceChaMod)
 
+        # set the new minimum value to 8 + the racial modifier
         self.strEdit.setMinimum(8 + self.raceStrMod)
         self.intEdit.setMinimum(8 + self.raceIntMod)
         self.dexEdit.setMinimum(8 + self.raceDexMod)
@@ -61,6 +63,7 @@ class mainFormDlg(QDialog) :
         self.wisEdit.setMinimum(8 + self.raceWisMod)
         self.chaEdit.setMinimum(8 + self.raceChaMod)
 
+        # set the new maximum value to 15 + the racial modifier
         self.strEdit.setMaximum(15 + self.raceStrMod)
         self.intEdit.setMaximum(15 + self.raceIntMod)
         self.dexEdit.setMaximum(15 + self.raceDexMod)

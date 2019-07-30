@@ -14,8 +14,7 @@ import createCharacterWindow
 import characterSheetWindow
 
 
-class mainFormDlg(QWidget) :
-
+class mainFormDlg(QWidget):
 
     def sendChatMessage(self):
         message = self.chatLineEdit.text()
@@ -32,9 +31,7 @@ class mainFormDlg(QWidget) :
                 self.chatBox.addItem(received[1]+"\n")
                 self.chatBox.scrollToBottom()
 
-
         self.chatLineEdit.clear()
-
 
     # JOIN GAME STUFF
     def updateCharacters(self):
@@ -128,6 +125,8 @@ class mainFormDlg(QWidget) :
             self.updateGame()
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
+            self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
+
         except Exception as e:
             msg = QMessageBox(self)
             msg.setText("An error occurred when trying to join game")
