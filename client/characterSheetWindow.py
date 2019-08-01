@@ -356,7 +356,7 @@ class mainFormDlg(QDialog) :
             self.updateAttackTable()
 
     def updateStats(self):
-        data=[11,self.parent().username,self.parent().password,self.parent().currentCharId]
+        data=[11,self.parent().username,self.parent().password,self.parent().currentClickedCharacterId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:

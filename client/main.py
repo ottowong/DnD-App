@@ -34,6 +34,8 @@ class mainFormDlg(QWidget):
         self.chatLineEdit.clear()
 
     # JOIN GAME STUFF
+
+    # update the list of the user's characters after selecting (but not joining) a game
     def updateCharacters(self):
         try:
             self.charactersListBox.clear()
@@ -63,6 +65,7 @@ class mainFormDlg(QWidget):
 
         print("updated characters")
 
+    # update the list of games after logging in
     def updateGames(self):
         self.gamesListBox.clear()
         self.joinGameButton.setEnabled(False)
@@ -104,6 +107,7 @@ class mainFormDlg(QWidget):
         self.gamesListBox.addItems(self.gameListFormatted)
         print("updated games")
 
+    # after clicking the join game button
     def joinGameButtonClicked(self):
         try:
             print("join")
@@ -119,6 +123,15 @@ class mainFormDlg(QWidget):
             self.currentCharId = int(character[0])
             print("currentCharId: ",self.currentCharId)
             self.currentCharName = character[1]
+
+            self.charactersList = [[self.currentCharId,character[1]]]
+
+            self.characterModel.clear()
+            self.characterModel.setHorizontalHeaderLabels(["Name"])
+
+            self.populateCharTable(self.charactersList)
+
+
             self.characterSheetButton.setText(character[1])
             self.playerStatus = 1
             self.gameRightWidget.setTabEnabled(1,True)
@@ -162,8 +175,33 @@ class mainFormDlg(QWidget):
             self.currentGameId = int(game[0])
             self.currentGameName = game[1]
             # self.characterSheetButton.setText(character[1])
+
+
+            self.characterModel.clear()
+            self.characterModel.setHorizontalHeaderLabels(["Name","User"])
+
+            data = [22, self.username,self.password,self.currentGameId]
+            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                self.tcp_client.connect((self.host_ip, self.server_port))
+                self.tcp_client.sendall(pickle.dumps(data))
+
+                received = pickle.loads(self.tcp_client.recv(1024))
+                print("received:",received)
+            except Exception as e:
+                print("error: ", e)
+            finally:
+                self.tcp_client.close()
+
+            self.charactersList = received
+
+            self.populateCharTableDm(self.charactersList)
+
+
+
+
             self.playerStatus = 2
-            self.gameRightWidget.setTabEnabled(1,False)
+            self.gameRightWidget.setTabEnabled(1,True)
             self.updateGame()
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
@@ -177,6 +215,23 @@ class mainFormDlg(QWidget):
             # msg.buttonClicked.connect(self.ok)
             msg.exec_()
             print("error:",e)
+
+    def charTableClicked(self, a):
+        self.currentClickedCharacterId = self.charactersList[a.row()][0]
+        print(self.charactersList[a.row()][0])
+        self.showCharacterSheet()
+
+
+    def populateCharTable(self, chars):
+        for char in chars:
+            cell = QStandardItem(str(char[1]))
+            self.characterModel.appendRow([cell])
+
+    def populateCharTableDm(self, chars):
+        for char in chars:
+            cell = QStandardItem(str(char[1]))
+            cell2 = QStandardItem(str(char[2]))
+            self.characterModel.appendRow([cell,cell2])
 
     # END OF JOIN GAME STUFF
 
@@ -628,10 +683,19 @@ class mainFormDlg(QWidget):
         self.characterTabLayout = QVBoxLayout()
         self.characterTabWidget.setLayout(self.characterTabLayout)
 
+        self.characterTable = QTableView()
+        self.characterTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.characterTable.clicked.connect(self.charTableClicked)
+        self.characterModel = QStandardItemModel(self)
+        self.characterTable.setModel(self.characterModel)
+
+
         self.characterSheetButton = QPushButton()
         self.characterSheetButton.clicked.connect(self.showCharacterSheet)
-        self.characterTabLayout.addWidget(self.characterSheetButton)
-        self.characterTabLayout.addStretch(1)
+        self.characterTabLayout.addWidget(self.characterTable)
+        self.characterTabLayout.setStretch(0,1)
+        self.characterModel.setHorizontalHeaderLabels(["Character"])
+        # self.characterTabLayout.addStretch(1)
         #
 
         # settingsTabWidget
@@ -645,7 +709,7 @@ class mainFormDlg(QWidget):
         self.gameRightWidget.addTab(self.characterTabWidget,"Character")
         # else:
         # self.gameRightWidget.addTab(self.characterTabWidget,"Monsters")
-        self.gameRightWidget.addTab(self.settingsTabWidget,"Settings")
+        # self.gameRightWidget.addTab(self.settingsTabWidget,"Settings")
         #
         # gameContentLayout
         self.gameContentLayout = QHBoxLayout()

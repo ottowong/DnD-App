@@ -727,6 +727,27 @@ VALUES
                 print("error: " + str(e))
             self.request.sendall(pickle.dumps(reply))
 
+        elif(self.data[0] == 22):
+            print("GET CHARACTERS IN GAME FOR DM")
+            success = 0
+
+            try:
+                executeString = "select character_ID,name,user_ID from Tbl_character where game_ID = ?"
+                cursor.execute(executeString, self.data[3])
+                characters = cursor.fetchall()
+                reply = []
+                # print("rows ", rows)
+                for row in characters:
+                    cursor.execute("select username from Tbl_user where user_ID = ?",row[2])
+                    users = cursor.fetchall()
+                    for user in users:
+                        reply.append([row[0], row[1], user[0]])
+
+                print("reply ", reply)
+            except Exception as e:
+                print("error: " + str(e))
+            self.request.sendall(pickle.dumps(reply))
+
         else:
             print(self.data[0])
             self.request.sendall(pickle.dumps("message received"))
