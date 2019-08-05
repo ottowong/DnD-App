@@ -10,6 +10,30 @@ import pickle
 
 class mainFormDlg(QDialog) :
 
+
+    def updateLabels(self):
+        data=[28,self.parent().parent().username,self.parent().parent().password,self.parent().attackToEdit]
+        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        try:
+            self.tcp_client.connect((self.parent().parent().host_ip, self.parent().parent().server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
+
+            received = pickle.loads(self.tcp_client.recv(1024))
+            print(received)
+
+            self.nameEdit.setText(received[0])
+            if(received[1]):
+                self.proficientBox.setCheckState(2)
+            self.toHitBox.setCurrentIndex(received[2])
+            self.toHitModBox.setValue(received[3])
+            self.dmgEdit.setText(received[4])
+            self.dmgBox.setCurrentIndex(received[5])
+            self.dmgModBox.setValue(received[6])
+
+        finally:
+            self.tcp_client.close()
+
     def save(self):
         name = self.nameEdit.text()
         proficient = self.proficientBox.isChecked()
@@ -19,7 +43,7 @@ class mainFormDlg(QDialog) :
         dmgStat = self.dmgBox.currentIndex()
         dmgMod = self.dmgModBox.value()
 
-        data=[17,self.parent().parent().username,self.parent().parent().password,name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,self.parent().parent().currentClickedCharacterId]
+        data=[29,self.parent().parent().username,self.parent().parent().password,name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,self.parent().attackToEdit]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
@@ -48,7 +72,7 @@ class mainFormDlg(QDialog) :
         print(self.parent().attackToEdit)
 
         self.setWindowIcon(QIcon('icon.png'))
-        self.setWindowTitle('Creating Attack')
+        self.setWindowTitle('Editing Attack')
         self.centerOnScreen()
 
         self.mainLayout = QVBoxLayout()
@@ -104,6 +128,7 @@ class mainFormDlg(QDialog) :
 
         self.setLayout(self.mainLayout)
 
+        self.updateLabels()
 
         # leave this at the end
         # self.splash.finish(self)

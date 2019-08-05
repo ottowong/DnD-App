@@ -14,11 +14,45 @@ import random
 import calculateAbilities
 import calculateProficiency
 
-import createAttackWindow
-import editAttackWindow
+import createMonsterAttackWindow
+import editMonsterAttackWindow
 
 
 class mainFormDlg(QDialog) :
+    def deleteMonster(self):
+        msg = QMessageBox.question(self, "Confirm", "Are you sure you want to delete "+str(self.monsterName)+"?", QMessageBox.Yes|QMessageBox.No)
+        # msg.setText("Are you sure you want to delete "+str(self.characterList[index][1])+"?")
+        # msg.setInformativeText("")
+        # msg.setWindowTitle("Confirm")
+        # msg.setDetailedText(errorString)
+        if(msg == QMessageBox.Yes):
+            self.delMonster()
+
+    def delMonster(self):
+        data = [34, self.parent().username,self.parent().password,self.monsterId]
+        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            # Establish connection to TCP server and exchange data
+            self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
+
+            # Read data from the TCP server and close the connection
+            received = pickle.loads(self.tcp_client.recv(1024))
+            print("received:",received)
+            msg = QMessageBox(self)
+            if(received[0] == 1):
+                self.parent().updateMonsters()
+            else:
+                msg.setText("Delete failed!")
+                msg.setInformativeText("Please try again")
+                msg.setWindowTitle("failure")
+                msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                # msg.buttonClicked.connect(self.ok)
+                msg.exec_()
+
+        finally:
+            self.close()
+            self.tcp_client.close()
 
     def saveAll(self):
         name = self.characterNameLabel.text()
@@ -55,14 +89,13 @@ class mainFormDlg(QDialog) :
         currentHp = self.currentHpBox.value()
         maxHp = self.maxHpBox.value()
         lvl = self.levelEdit.value()
-        xp = self.xpEdit.value()
         personalityTraits = self.personalityTraitsBox.toPlainText()
         ideals = self.idealsBox.toPlainText()
         bonds = self.bondsBox.toPlainText()
         flaws = self.flawsBox.toPlainText()
         charId = self.charId
-        print(name,stre,inte,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,charId)
-        data = [14,self.parent().username,self.parent().password,name,stre,inte,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,charId]
+        data = [25,self.parent().username,self.parent().password,name,stre,inte,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,personalityTraits,ideals,bonds,flaws,charId]
+        print(data)
 
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
@@ -164,53 +197,9 @@ class mainFormDlg(QDialog) :
     def survivalClicked(self):
         self.statRoll(self.survivalLabel.text(), "Survival")
 
-    def checkLevel(self):
-        xp = self.xpEdit.value()
-        if(xp >= 355000):
-            lvl = 20
-        elif(xp >= 305000):
-            lvl = 19
-        elif(xp >= 265000):
-            lvl = 18
-        elif(xp >= 225000):
-            lvl = 17
-        elif(xp >= 195000):
-            lvl = 16
-        elif(xp >= 165000):
-            lvl = 15
-        elif(xp >= 140000):
-            lvl = 14
-        elif(xp >= 120000):
-            lvl = 13
-        elif(xp >= 100000):
-            lvl = 12
-        elif(xp >= 85000):
-            lvl = 11
-        elif(xp >= 64000):
-            lvl = 10
-        elif(xp >= 48000):
-            lvl = 9
-        elif(xp >= 34000):
-            lvl = 8
-        elif(xp >= 23000):
-            lvl = 7
-        elif(xp >= 14000):
-            lvl = 6
-        elif(xp >= 6500):
-            lvl = 5
-        elif(xp >= 2700):
-            lvl = 4
-        elif(xp >= 900):
-            lvl = 3
-        elif(xp >= 300):
-            lvl = 2
-        else:
-            lvl = 1
-        self.levelEdit.setValue(lvl)
 
     def updateLabels(self):
         if(self.initialised):
-            self.checkLevel()
             self.setWindowTitle(self.charName)
             self.characterNameLabel.setText(self.charName)
 
@@ -356,7 +345,7 @@ class mainFormDlg(QDialog) :
             self.updateAttackTable()
 
     def updateStats(self):
-        data=[11,self.parent().username,self.parent().password,self.parent().currentClickedCharacterId]
+        data=[26,self.parent().username,self.parent().password,self.monsterId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
@@ -400,12 +389,11 @@ class mainFormDlg(QDialog) :
             self.charCurrentHp = received[31]
             self.charMaxHp = received[32]
             self.charLvl = received[33]
-            self.charXp = received[34]
-            self.charPersonalityTraits = received[35]
-            self.charIdeals = received[36]
-            self.charBonds = received[37]
-            self.charFlaws = received[38]
-            self.charId = received[39]
+            self.charPersonalityTraits = received[34]
+            self.charIdeals = received[35]
+            self.charBonds = received[36]
+            self.charFlaws = received[37]
+            self.charId = received[38]
 
             # self.proficiency = calculateProficiency.calcProficiency(self.charLvl)
 
@@ -419,13 +407,12 @@ class mainFormDlg(QDialog) :
         self.flawsBox.setText(self.charFlaws)
 
         self.levelEdit.setValue(self.charLvl)
-        self.xpEdit.setValue(self.charXp)
 
         self.maxHpBox.setValue(self.charMaxHp)
         self.currentHpBox.setValue(self.charCurrentHp)
 
     def fetchAttacks(self):
-        data=[12,self.parent().username,self.parent().password,self.charId]
+        data=[31,self.parent().username,self.parent().password,self.charId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.attacksList = []
         try:
@@ -505,7 +492,7 @@ class mainFormDlg(QDialog) :
 
     def editAttack(self, a):
         self.attackToEdit = self.attacksList[a][7]
-        editWindow = editAttackWindow.mainFormDlg(self)
+        editWindow = editMonsterAttackWindow.mainFormDlg(self)
         editWindow.show()
 
     def deleteAttack(self, a):
@@ -514,7 +501,7 @@ class mainFormDlg(QDialog) :
             self.delAttack(self.attacksList[a][7])
 
     def delAttack(self, a):
-        data = [16, self.parent().username,self.parent().password,a]
+        data = [30, self.parent().username,self.parent().password,a]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
@@ -538,7 +525,7 @@ class mainFormDlg(QDialog) :
 
     def newAttack(self):
         print("create new attack")
-        newWindow = createAttackWindow.mainFormDlg(self)
+        newWindow = createMonsterAttackWindow.mainFormDlg(self)
         newWindow.show()
 
     def tableClicked(self, a):
@@ -1102,6 +1089,9 @@ class mainFormDlg(QDialog) :
         self.attackToEdit = 0
         self.initialised = 0
 
+        self.monsterId = self.parent().currentClickedMonster[0]
+        self.monsterName = self.parent().currentClickedMonster[1]
+
         self.statsList = ["STR","DEX","CON","INT","WIS","CHA"]
 
         self.updateStats()
@@ -1309,8 +1299,11 @@ class mainFormDlg(QDialog) :
         self.midColLayout.addWidget(self.attacksWidget)
 
         self.saveButton = QPushButton("Save All")
+        self.deleteButton = QPushButton("Delete Monster")
+        self.deleteButton.clicked.connect(self.deleteMonster)
         self.saveButton.clicked.connect(self.saveAll)
         self.midColLayout.addWidget(self.saveButton)
+        self.midColLayout.addWidget(self.deleteButton)
 
         self.midColLayout.addStretch(1)
         #
@@ -1380,13 +1373,9 @@ class mainFormDlg(QDialog) :
         self.levelEdit = QSpinBox()
         self.levelEdit.valueChanged.connect(self.updateLabels)
         self.levelEdit.setMinimum(1)
-        self.levelEdit.setMaximum(20)
+        self.levelEdit.setMaximum(100)
         self.levelEdit.setMinimumWidth(100)
-        self.xpEdit = QSpinBox()
-        self.xpEdit.setMaximum(355000)
-        self.xpEdit.valueChanged.connect(self.updateLabels)
         self.levelLayout.addRow("Level",self.levelEdit)
-        self.levelLayout.addRow("XP",self.xpEdit)
 
 
         self.topRowLayout.addWidget(self.characterNameLabel)

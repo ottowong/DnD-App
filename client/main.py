@@ -11,8 +11,10 @@ import socket
 import pickle
 import createGameWindow
 import createCharacterWindow
+import createMonsterWindow
 import characterSheetWindow
-
+import monsterSheetWindow
+import passwordWindow
 
 class mainFormDlg(QWidget):
 
@@ -57,7 +59,7 @@ class mainFormDlg(QWidget):
                 self.characterListFormatted.append(str(character[1]))
                 self.characterList.append(character)
                 character[0] = str(character[0])
-                self.charactersListBox.addItems(self.characterListFormatted)
+            self.charactersListBox.addItems(self.characterListFormatted)
         except Exception as e:
             print(e)
 
@@ -114,42 +116,53 @@ class mainFormDlg(QWidget):
             # print(self.mainLayout.currentIndex())
             gameIndex = self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()
             characterIndex = self.charactersListBox.indexFromItem(self.charactersListBox.selectedItems()[0]).row()
-            game = self.gameList[gameIndex]
-            print(game)
-            character = self.characterList[characterIndex]
-            print(character)
-            self.currentGameId = int(game[0])
-            self.currentGameName = game[1]
-            self.currentCharId = int(character[0])
-            print("currentCharId: ",self.currentCharId)
-            self.currentCharName = character[1]
-
-            self.charactersList = [[self.currentCharId,character[1]]]
-
-            self.characterModel.clear()
-            self.characterModel.setHorizontalHeaderLabels(["Name"])
-
-            self.populateCharTable(self.charactersList)
-
-
-            self.characterSheetButton.setText(character[1])
-            self.playerStatus = 1
-            self.gameRightWidget.setTabEnabled(1,True)
-            self.updateGame()
-            self.mainLayout.setCurrentIndex(2)
-            self.chatBox.clear()
-            self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
+            self.currentClickedGame = self.gameList[gameIndex]
+            print(self.currentClickedGame)
+            if(self.currentClickedGame[2] == True):
+                print("There is a password on this game")
+                self.showPasswordWindow()
+            else:
+                self.passwordCorrect()
 
         except Exception as e:
             msg = QMessageBox(self)
             msg.setText("An error occurred when trying to join game")
             msg.setInformativeText("Make sure you haves selected both a game and a character.")
             msg.setWindowTitle("Error")
-            # msg.setDetailedText(errorString)
+            msg.setDetailedText(str(e))
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
             # msg.buttonClicked.connect(self.ok)
             msg.exec_()
             print("error:",e)
+
+    def passwordCorrect(self):
+        gameIndex = self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()
+        characterIndex = self.charactersListBox.indexFromItem(self.charactersListBox.selectedItems()[0]).row()
+        character = self.characterList[characterIndex]
+        print(character)
+        self.currentGameId = int(self.currentClickedGame[0])
+        self.currentGameName = self.currentClickedGame[1]
+        self.currentCharId = int(character[0])
+        print("currentCharId: ",self.currentCharId)
+        self.currentCharName = character[1]
+
+        self.charactersList = [[self.currentCharId,character[1]]]
+
+        self.characterModel.clear()
+        self.characterModel.setHorizontalHeaderLabels(["Name"])
+
+        self.populateCharTable(self.charactersList)
+
+
+        # self.characterSheetButton.setText(character[1])
+        self.playerStatus = 1
+        self.gameRightWidget.setTabEnabled(2,False)
+        self.updateGame()
+        self.mainLayout.setCurrentIndex(2)
+        self.chatBox.clear()
+        self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
+
+
 
     def deleteGame(self):
         print("delete game")
@@ -163,6 +176,23 @@ class mainFormDlg(QWidget):
         if(msg == QMessageBox.Yes):
             self.delGame()
         # msg.exec_()
+    def updateMonsters(self):
+        self.monsterModel.clear()
+        data = [23, self.username,self.password]
+        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.tcp_client.connect((self.host_ip, self.server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
+
+            received = pickle.loads(self.tcp_client.recv(1024))
+            print("received:",received)
+            self.monstersList = received
+            self.populateMonsterTableDm(self.monstersList)
+        except Exception as e:
+            print("error: ", e)
+        finally:
+            self.tcp_client.close()
+
 
     def joinGameDmButtonClicked(self):
 
@@ -178,6 +208,8 @@ class mainFormDlg(QWidget):
 
 
             self.characterModel.clear()
+
+
             self.characterModel.setHorizontalHeaderLabels(["Name","User"])
 
             data = [22, self.username,self.password,self.currentGameId]
@@ -188,12 +220,16 @@ class mainFormDlg(QWidget):
 
                 received = pickle.loads(self.tcp_client.recv(1024))
                 print("received:",received)
+                self.charactersList = received
             except Exception as e:
                 print("error: ", e)
             finally:
                 self.tcp_client.close()
 
-            self.charactersList = received
+            self.updateMonsters()
+
+
+
 
             self.populateCharTableDm(self.charactersList)
 
@@ -201,7 +237,7 @@ class mainFormDlg(QWidget):
 
 
             self.playerStatus = 2
-            self.gameRightWidget.setTabEnabled(1,True)
+            self.gameRightWidget.setTabEnabled(2,True)
             self.updateGame()
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
@@ -221,6 +257,10 @@ class mainFormDlg(QWidget):
         print(self.charactersList[a.row()][0])
         self.showCharacterSheet()
 
+    def monsterTableClicked(self, a):
+        self.currentClickedMonster = self.monstersList[a.row()]
+        print(self.monstersList[a.row()][0])
+        self.showMonsterSheet()
 
     def populateCharTable(self, chars):
         for char in chars:
@@ -232,6 +272,10 @@ class mainFormDlg(QWidget):
             cell = QStandardItem(str(char[1]))
             cell2 = QStandardItem(str(char[2]))
             self.characterModel.appendRow([cell,cell2])
+
+    def populateMonsterTableDm(self, monsters):
+        for monster in monsters:
+            self.monsterModel.appendRow([QStandardItem(str(monster[1]))])
 
     # END OF JOIN GAME STUFF
 
@@ -322,8 +366,9 @@ class mainFormDlg(QWidget):
         username = self.usernameEdit.text()
         password = self.passwordEdit.text()
         data=[1,username,password]
-        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        msg = QMessageBox(self)
         try:
+            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Establish connection to TCP server and exchange data
             self.tcp_client.connect((self.host_ip, self.server_port))
             self.tcp_client.sendall(pickle.dumps(data))
@@ -354,6 +399,14 @@ class mainFormDlg(QWidget):
                 msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
                 # msg.buttonClicked.connect(self.ok)
                 msg.exec_()
+        except Exception as e:
+            msg.setText("Error")
+            msg.setInformativeText("Failed to connect to the server")
+            msg.setWindowTitle("Error")
+            msg.setDetailedText(str(e))
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            # msg.buttonClicked.connect(self.ok)
+            msg.exec_()
 
         finally:
 
@@ -446,9 +499,21 @@ class mainFormDlg(QWidget):
         character = createCharacterWindow.mainFormDlg(self)
         character.exec_()
 
+    def createMonster(self):
+        monster = createMonsterWindow.mainFormDlg(self)
+        monster.exec_()
+
     def showCharacterSheet(self):
         charSheet = characterSheetWindow.mainFormDlg(self)
         charSheet.show()
+
+    def showMonsterSheet(self):
+        monsterSheet = monsterSheetWindow.mainFormDlg(self)
+        monsterSheet.show()
+
+    def showPasswordWindow(self):
+        window = passwordWindow.mainFormDlg(self)
+        window.show()
 
     def updateGame(self):
         print("update game")
@@ -688,15 +753,29 @@ class mainFormDlg(QWidget):
         self.characterTable.clicked.connect(self.charTableClicked)
         self.characterModel = QStandardItemModel(self)
         self.characterTable.setModel(self.characterModel)
-
-
-        self.characterSheetButton = QPushButton()
-        self.characterSheetButton.clicked.connect(self.showCharacterSheet)
         self.characterTabLayout.addWidget(self.characterTable)
         self.characterTabLayout.setStretch(0,1)
         self.characterModel.setHorizontalHeaderLabels(["Character"])
-        # self.characterTabLayout.addStretch(1)
         #
+
+        # monsterTabWidget
+        self.monsterTabWidget = QWidget()
+        self.monsterTabLayout = QVBoxLayout()
+        self.monsterTabWidget.setLayout(self.monsterTabLayout)
+
+        self.createMonsterButton = QPushButton("Create Monster")
+        self.createMonsterButton.clicked.connect(self.createMonster)
+        self.monsterTable = QTableView()
+        self.monsterTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.monsterTable.clicked.connect(self.monsterTableClicked)
+        self.monsterModel = QStandardItemModel(self)
+        self.monsterTable.setModel(self.monsterModel)
+        self.monsterTabLayout.addWidget(self.monsterTable)
+        self.monsterTabLayout.addWidget(self.createMonsterButton)
+        self.monsterTabLayout.setStretch(0,1)
+        self.monsterModel.setHorizontalHeaderLabels(["Monster"])
+        #
+
 
         # settingsTabWidget
         self.settingsTabWidget = QWidget()
@@ -705,10 +784,9 @@ class mainFormDlg(QWidget):
         # gameRightWidget
         self.gameRightWidget = QTabWidget()
         self.gameRightWidget.addTab(self.chatTabWidget,"Chat")
-        # if(self.playerStatus == 1):
         self.gameRightWidget.addTab(self.characterTabWidget,"Character")
-        # else:
-        # self.gameRightWidget.addTab(self.characterTabWidget,"Monsters")
+        self.gameRightWidget.addTab(self.monsterTabWidget,"Monsters")
+        self.gameRightWidget.setTabEnabled(2,False)
         # self.gameRightWidget.addTab(self.settingsTabWidget,"Settings")
         #
         # gameContentLayout
