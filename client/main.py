@@ -15,6 +15,7 @@ import createMonsterWindow
 import characterSheetWindow
 import monsterSheetWindow
 import passwordWindow
+import characterPasswordWindow
 
 class mainFormDlg(QWidget):
 
@@ -229,11 +230,7 @@ class mainFormDlg(QWidget):
             self.updateMonsters()
 
 
-
-
             self.populateCharTableDm(self.charactersList)
-
-
 
 
             self.playerStatus = 2
@@ -241,6 +238,8 @@ class mainFormDlg(QWidget):
             self.updateGame()
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
+            self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
+            
         except Exception as e:
             msg = QMessageBox(self)
             msg.setText("An error occurred when trying to join game")
@@ -323,7 +322,7 @@ class mainFormDlg(QWidget):
         if not re.match(r"^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$", self.createUsernameEdit.text()):
             errors.append("Username is invalid.")
         if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", self.createPasswordEdit.text()):
-            errors.append("Password must contain at least one capital and lower case letter, at least one number, and be at least 8 digits long.")
+            errors.append("Password must contain at least one capital and lower case letter, at least one number, and be at least 8 characters long.")
         if(errors == []):
 
 
@@ -495,9 +494,19 @@ class mainFormDlg(QWidget):
             self.delChar()
         # msg.exec_()
 
-    def createCharacter(self):
+    def characterPasswordCorrect(self):
         character = createCharacterWindow.mainFormDlg(self)
         character.exec_()
+
+    def createCharacter(self):
+        gameIndex = self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()
+        currentClickedGame = self.gameList[gameIndex]
+        print(currentClickedGame)
+        if(currentClickedGame[2] == True):
+            print("There is a password on this game")
+            self.showCharacterPasswordWindow()
+        else:
+            self.characterPasswordCorrect()
 
     def createMonster(self):
         monster = createMonsterWindow.mainFormDlg(self)
@@ -510,6 +519,10 @@ class mainFormDlg(QWidget):
     def showMonsterSheet(self):
         monsterSheet = monsterSheetWindow.mainFormDlg(self)
         monsterSheet.show()
+
+    def showCharacterPasswordWindow(self):
+        window = characterPasswordWindow.mainFormDlg(self)
+        window.show()
 
     def showPasswordWindow(self):
         window = passwordWindow.mainFormDlg(self)

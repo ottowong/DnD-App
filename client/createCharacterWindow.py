@@ -185,6 +185,7 @@ class mainFormDlg(QDialog) :
         self.wisEdit = QSpinBox()
         self.chaEdit = QSpinBox()
         self.hpEdit = QSpinBox()
+        self.hpEdit.setReadOnly(True)
 
         self.strEdit.setValue(8)
         self.intEdit.setValue(8)
