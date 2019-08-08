@@ -56,7 +56,7 @@ class mainFormDlg(QDialog) :
         # splashImg = QPixmap('splash.png')
         # self.splash = QSplashScreen(splashImg)
         # self.splash.show()
-        self.setWindowIcon(QIcon('icon.png'))
+        self.setWindowIcon(QIcon('images/icon.png'))
         gameIndex = self.parent().gamesListBox.indexFromItem(self.parent().gamesListBox.selectedItems()[0]).row()
         self.currentClickedGame = self.parent().gameList[gameIndex]
         self.setWindowTitle(("Please enter password for " + self.currentClickedGame[1]))

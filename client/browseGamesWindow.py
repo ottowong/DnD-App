@@ -94,7 +94,7 @@ class mainFormDlg(QDialog) :
         timer = time.perf_counter()
         self.setGeometry(0, 0, 300, 100)
 
-        self.setWindowIcon(QIcon('icon.png'))
+        self.setWindowIcon(QIcon('images/icon.png'))
         self.setWindowTitle('dnd app')
         self.centerOnScreen()
 

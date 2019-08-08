@@ -71,7 +71,7 @@ class mainFormDlg(QDialog) :
 
         print(self.parent().attackToEdit)
 
-        self.setWindowIcon(QIcon('icon.png'))
+        self.setWindowIcon(QIcon('images/icon.png'))
         self.setWindowTitle('Editing Attack')
         self.centerOnScreen()
 

@@ -1096,7 +1096,7 @@ class mainFormDlg(QDialog) :
 
         self.updateStats()
 
-        self.setWindowIcon(QIcon('icon.png'))
+        self.setWindowIcon(QIcon('images/icon.png'))
         self.centerOnScreen()
         self.fetchAttacks()
 

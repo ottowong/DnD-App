@@ -75,7 +75,7 @@ class mainFormDlg(QDialog) :
         # splashImg = QPixmap('splash.png')
         # self.splash = QSplashScreen(splashImg)
         # self.splash.show()
-        self.setWindowIcon(QIcon('icon.png'))
+        self.setWindowIcon(QIcon('images/icon.png'))
         self.setWindowTitle('dnd app')
         self.centerOnScreen()
 
