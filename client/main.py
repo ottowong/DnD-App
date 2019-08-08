@@ -239,7 +239,7 @@ class mainFormDlg(QWidget):
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
             self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
-            
+
         except Exception as e:
             msg = QMessageBox(self)
             msg.setText("An error occurred when trying to join game")
@@ -872,7 +872,7 @@ class mainFormDlg(QWidget):
     def __init__(self, parent= None) :
         super(mainFormDlg, self).__init__(parent)
         # timer = time.perf_counter()
-        self.setGeometry(0, 0, 1000, 600)
+        self.setGeometry(0, 0, 1100, 600)
         splashImg = QPixmap('splash.png')
         self.splash = QSplashScreen(splashImg)
         self.splash.show()

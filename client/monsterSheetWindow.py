@@ -107,7 +107,7 @@ class mainFormDlg(QDialog) :
     def statRoll(self, modifier, stat):
         message = "!r1d20+"+modifier
         data = [9,self.parent().username,self.parent().password,message]
-        self.parent().chatBox.addItem(stat+" check for "+self.parent().username)
+        self.parent().chatBox.addItem(stat+" check for "+self.charName)
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
         self.tcp_client.sendall(pickle.dumps(data))

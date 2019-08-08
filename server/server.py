@@ -226,20 +226,20 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             maxSides = 1000
 
             helpstring = ("""format your messages in the format:
-            !r[number of dice]d[number of sides]
-            for example:
-                !r1d20
-                you can also add a modifier or roll
-                multiple dice by adding:
-                +[number]
-                or
-                +[number of dice]d[number of sides]
-                to the end of your message. e.g.
-                !r1d20+2d6+5
-                do not roll more than """+str(maxNumberOfRolls)+""" dice
-                with more than """+str(maxSides)+""" sides
-                with a modifier greater than """+str(maxModifier)+"""
-                or more than """+str(maxNumberOfDice)+""" different dice.""")
+!r[number of dice]d[number of sides]
+for example:
+    !r1d20
+    you can also add a modifier or roll
+    multiple dice by adding:
+    +[number]
+    or
+    +[number of dice]d[number of sides]
+    to the end of your message. e.g.
+    !r1d20+2d6+5
+    do not roll more than """+str(maxNumberOfRolls)+""" dice
+    with more than """+str(maxSides)+""" sides
+    with a modifier greater than """+str(maxModifier)+"""
+    or more than """+str(maxNumberOfDice)+""" different dice.""")
 
             counter = 0
             invalid = False

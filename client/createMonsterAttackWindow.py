@@ -19,7 +19,7 @@ class mainFormDlg(QDialog) :
         dmgStat = self.dmgBox.currentIndex()
         dmgMod = self.dmgModBox.value()
 
-        data=[27,self.parent().parent().username,self.parent().parent().password,name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,self.parent().parent().currentClickedMonsterId]
+        data=[27,self.parent().parent().username,self.parent().parent().password,name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,self.parent().monsterId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
