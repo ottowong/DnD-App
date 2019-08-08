@@ -362,6 +362,7 @@ class mainFormDlg(QWidget):
 
     def loginClicked(self):
         print("login")
+        self.charactersListBox.clear()
         username = self.usernameEdit.text()
         password = self.passwordEdit.text()
         data=[1,username,password]

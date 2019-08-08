@@ -7,9 +7,9 @@ import pickle
 from random import randint
 
 ## Laptop
-# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 ## PC
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 
 cursor = cnxn.cursor()
 
