@@ -21,7 +21,7 @@ class mainFormDlg(QDialog) :
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # Establish connection to TCP server and exchange data
-            self.tcp_client.connect((self.host_ip, self.server_port))
+            self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
             self.tcp_client.sendall(pickle.dumps(data))
 
             # Read data from the TCP server and close the connection
@@ -60,8 +60,6 @@ class mainFormDlg(QDialog) :
         self.setWindowTitle(("Please enter password for " + self.parent().currentClickedGame[1]))
         self.centerOnScreen()
 
-        self.host_ip = "localhost"
-        self.server_port = 42069
         self.passwordEdit = QLineEdit()
 
         self.passwordEdit.setEchoMode(2)
