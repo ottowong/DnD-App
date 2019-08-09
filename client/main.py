@@ -16,6 +16,7 @@ import characterSheetWindow
 import monsterSheetWindow
 import passwordWindow
 import characterPasswordWindow
+import pyodbc
 
 class mainFormDlg(QWidget):
 
@@ -163,20 +164,6 @@ class mainFormDlg(QWidget):
         self.chatBox.clear()
         self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
 
-
-
-    def deleteGame(self):
-        print("delete game")
-        index = ((self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()))
-        msg = QMessageBox.question(self, "Confirm", "Are you sure you want to delete "+str(self.gameList[index][1])+"?", QMessageBox.Yes|QMessageBox.No)
-        print(self.gameList[index])
-        # msg.setText("Are you sure you want to delete "+str(self.characterList[index][1])+"?")
-        # msg.setInformativeText("")
-        # msg.setWindowTitle("Confirm")
-        # msg.setDetailedText(errorString)
-        if(msg == QMessageBox.Yes):
-            self.delGame()
-        # msg.exec_()
     def updateMonsters(self):
         self.monsterModel.clear()
         data = [23, self.username,self.password]
@@ -193,6 +180,20 @@ class mainFormDlg(QWidget):
             print("error: ", e)
         finally:
             self.tcp_client.close()
+
+    def deleteGame(self):
+        print("delete game")
+        index = ((self.gamesListBox.indexFromItem(self.gamesListBox.selectedItems()[0]).row()))
+        msg = QMessageBox.question(self, "Confirm", "Are you sure you want to delete "+str(self.gameList[index][1])+"?", QMessageBox.Yes|QMessageBox.No)
+        print(self.gameList[index])
+        # msg.setText("Are you sure you want to delete "+str(self.characterList[index][1])+"?")
+        # msg.setInformativeText("")
+        # msg.setWindowTitle("Confirm")
+        # msg.setDetailedText(errorString)
+        if(msg == QMessageBox.Yes):
+            self.delGame()
+        # msg.exec_()
+
 
 
     def joinGameDmButtonClicked(self):
@@ -266,15 +267,18 @@ class mainFormDlg(QWidget):
             cell = QStandardItem(str(char[1]))
             self.characterModel.appendRow([cell])
 
+    def populateMonsterTableDm(self, monsters):
+        for monster in monsters:
+            cell = QStandardItem(str(monster[1]))
+            self.monsterModel.appendRow([cell])
+
     def populateCharTableDm(self, chars):
         for char in chars:
             cell = QStandardItem(str(char[1]))
             cell2 = QStandardItem(str(char[2]))
             self.characterModel.appendRow([cell,cell2])
 
-    def populateMonsterTableDm(self, monsters):
-        for monster in monsters:
-            self.monsterModel.appendRow([QStandardItem(str(monster[1]))])
+
 
     # END OF JOIN GAME STUFF
 
