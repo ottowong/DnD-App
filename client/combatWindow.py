@@ -9,6 +9,8 @@ import socket
 import pickle
 import calculateAbilities
 
+import bubbleSort
+
 
 class mainFormDlg(QDialog) :
 
@@ -20,6 +22,7 @@ class mainFormDlg(QDialog) :
             self.tcp_client.sendall(pickle.dumps(data))
 
             received = pickle.loads(self.tcp_client.recv(1024))
+            self.populateBoxes()
         except Exception as e:
             print(e)
 
@@ -60,19 +63,32 @@ class mainFormDlg(QDialog) :
             self.allCharacters = received[0]
             self.allMonsters = received[1]
 
+            self.turnOrder = []
+
             self.charNames = []
             for char in self.allCharacters:
                 self.charNames.append(char[1])
+                self.turnOrder.append(char)
 
             self.monsterNames = []
             for monster in self.allMonsters:
                 self.monsterNames.append(monster[1])
+                self.turnOrder.append(monster)
 
             self.characterBox.clear()
             self.monsterBox.clear()
 
             self.characterBox.addItems(self.charNames)
             self.monsterBox.addItems(self.monsterNames)
+
+            self.turnOrder = bubbleSort.sort(self.turnOrder)
+            self.turnOrderNames = []
+            for i in range(0, len(self.turnOrder)):
+                self.turnOrderNames.append(str(i+1)+". "+self.turnOrder[i][1]+" ("+str(self.turnOrder[i][2])+")")
+
+            print(self.turnOrderNames)
+            self.turnOrderBox.clear()
+            self.turnOrderBox.addItems(self.turnOrderNames)
 
 
         except Exception as e:
