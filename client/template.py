@@ -12,7 +12,7 @@ class mainFormDlg(QDialog) :
 
 
     def loginClicked(self):
-        data=[2,name,password,self.parent().userId]
+        data=[2,self.parent().username,self.parent().password,self.parent().userId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:

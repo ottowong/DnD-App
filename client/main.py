@@ -172,8 +172,7 @@ class mainFormDlg(QWidget):
 
         self.charactersList = [[self.currentCharId,character[1]]]
 
-        self.characterModel.clear()
-        self.characterModel.setHorizontalHeaderLabels(["Name"])
+
 
         self.populateCharTable(self.charactersList)
 
@@ -233,10 +232,7 @@ class mainFormDlg(QWidget):
             # self.characterSheetButton.setText(character[1])
 
 
-            self.characterModel.clear()
 
-
-            self.characterModel.setHorizontalHeaderLabels(["Name","User"])
 
             data = [22, self.username,self.password,self.currentGameId]
             self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -295,6 +291,8 @@ class mainFormDlg(QWidget):
 
 
     def populateCharTable(self, chars):
+        self.characterModel.clear()
+        self.characterModel.setHorizontalHeaderLabels(["Name"])
         for char in chars:
             cell = QStandardItem(str(char[1]))
             self.characterModel.appendRow([cell])
@@ -305,6 +303,8 @@ class mainFormDlg(QWidget):
             self.monsterModel.appendRow([cell])
 
     def populateCharTableDm(self, chars):
+        self.characterModel.clear()
+        self.characterModel.setHorizontalHeaderLabels(["Name","User"])
         for char in chars:
             cell = QStandardItem(str(char[1]))
             cell2 = QStandardItem(str(char[2]))

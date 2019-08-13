@@ -10,11 +10,14 @@ import pickle
 
 import calculateAbilities
 import calculateProficiency
+import chooseTargetWindow
 
 class mainFormDlg(QDialog) :
 
     def diceRoll(self, dice):
-        print(dice)
+        self.currentDice = dice
+        chooseTargetWindow.mainFormDlg(self).show()
+
 
     def updateStats(self):
         data=[11,self.parent().parent().username,self.parent().parent().password,self.currentId]
@@ -123,6 +126,7 @@ class mainFormDlg(QDialog) :
 
         self.currentThing = self.parent().currentClickedThing
         self.currentId = self.currentThing[0]
+        self.combatId = self.parent().combatId
         print("thing")
         print(self.currentThing)
         print(self.currentId)

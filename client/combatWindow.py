@@ -17,13 +17,16 @@ class mainFormDlg(QDialog) :
     def turnOrderBoxClicked(self):
         print("turnOrderBoxClicked")
         self.currentClickedThing = (self.turnOrder[((self.turnOrderBox.indexFromItem(self.turnOrderBox.selectedItems()[0]).row()))])
+
         if(self.currentClickedThing[3]):
-            print("character")
-            # self.currentClickedCharacter = self.currentClickedThing[0]
-            characterCombatWindow.mainFormDlg(self).show()
+
+            if(self.parent().playerStatus == 2 or self.parent().currentCharId == self.currentClickedThing[0]):
+                print("character")
+                characterCombatWindow.mainFormDlg(self).show()
+
         else:
-            print("monster")
-            # self.currentClickedMonster = self.currentClickedThing[0]
+            if(self.parent().playerStatus == 2):
+                print("monster")
 
     def characterBoxClicked(self):
         print("characterBoxClicked")

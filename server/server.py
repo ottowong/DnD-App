@@ -9,9 +9,9 @@ import calculateAbilities
 from random import randint
 
 ## Laptop
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 ## PC
-# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 
 cursor = cnxn.cursor()
 
@@ -386,7 +386,9 @@ for example:
                     ideals,
                     bonds,
                     flaws,
-                    character_ID
+                    character_ID,
+                    race_ID,
+                    class_ID
                 from
                   Tbl_character
                 where
@@ -436,10 +438,23 @@ for example:
                     bonds = row[37]
                     flaws = row[38]
                     character_ID = row[39]
+                    race_ID = row[40]
+                    class_ID = row[41]
                     success = 1
 
+                executeString = "select class from Tbl_class where class_ID = ?"
+                cursor.execute(executeString, class_ID)
+                rows = cursor.fetchall()
+                for row in rows:
+                    className = row[0]
 
-                reply = [name,stre,inte,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,character_ID]
+                executeString = "select race from Tbl_race where race_ID = ?"
+                cursor.execute(executeString, race_ID)
+                rows = cursor.fetchall()
+                for row in rows:
+                    raceName = row[0]
+
+                reply = [name,stre,inte,dex,con,wis,cha,savStr,savDex,savCon,savInt,savWis,savCha,acrobatics,animalHandling,arcana,athletics,deception,history,insight,intimidation,investigation,medicine,nature,perception,performance,persuasion,religion,sleightOfHand,stealth,survival,currentHp,maxHp,lvl,xp,personalityTraits,ideals,bonds,flaws,character_ID,className,raceName]
                 print(reply)
             except Exception as e:
                 print("error: " + str(e))

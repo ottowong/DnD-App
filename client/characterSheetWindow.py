@@ -230,6 +230,9 @@ class mainFormDlg(QDialog) :
             self.proficiency = calculateProficiency.calcProficiency(self.levelEdit.value())
             self.proficiencyNumber.setText(str(self.proficiency))
 
+            self.iniLabel.setText(str(calculateAbilities.calcAbility(self.charDex)))
+            self.armourLabel.setText(str(10+calculateAbilities.calcAbility(self.charDex)))
+
             if(self.savStrBox.isChecked()):
                 strProf = self.proficiency
             else:
@@ -353,6 +356,9 @@ class mainFormDlg(QDialog) :
                 survivalProf = 0
             self.survivalLabel.setText(str(calculateAbilities.calcAbility(self.charWis) + survivalProf))
 
+            self.classEdit.setText(self.className)
+            self.raceEdit.setText(self.raceName)
+
             self.updateAttackTable()
 
     def updateStats(self):
@@ -406,6 +412,9 @@ class mainFormDlg(QDialog) :
             self.charBonds = received[37]
             self.charFlaws = received[38]
             self.charId = received[39]
+
+            self.className = received[40]
+            self.raceName = received[41]
 
             # self.proficiency = calculateProficiency.calcProficiency(self.charLvl)
 
@@ -554,7 +563,6 @@ class mainFormDlg(QDialog) :
             self.editAttack(a.row())
         elif(a.column() == 4):
             self.deleteAttack(a.row())
-
 
     def centerOnScreen(self):
         resolution = QDesktopWidget().screenGeometry()
@@ -1278,7 +1286,42 @@ class mainFormDlg(QDialog) :
         self.midColLayout.addWidget(self.hpWidget)
         # self.midColLayout.addWidget(self.currentHpBox)
 
+        # armor class and initiation
+        self.armourIniWidget = QWidget()
+        # self.armourIniWidget.setStyleSheet(".QWidget{border: 1px solid #000000;}")
+        self.armourIniLayout = QHBoxLayout()
+        self.armourIniWidget.setLayout(self.armourIniLayout)
 
+        self.armourWidget = QWidget()
+        self.armourWidget.setStyleSheet(".QWidget{border: 1px solid #000000;}")
+        self.armourLayout = QVBoxLayout()
+        self.armourLabel = QLabel()
+        self.armourLabel.setStyleSheet("font-size: 36px; font:bold;")
+        self.armourLabel.setAlignment(Qt.AlignHCenter)
+        self.armour2Label = QLabel("Armour Class")
+        self.armour2Label.setAlignment(Qt.AlignHCenter)
+        self.armourWidget.setLayout(self.armourLayout)
+
+        self.armourLayout.addWidget(self.armourLabel)
+        self.armourLayout.addWidget(self.armour2Label)
+
+        self.iniWidget = QWidget()
+        self.iniWidget.setStyleSheet(".QWidget{border: 1px solid #000000;}")
+        self.iniLayout = QVBoxLayout()
+        self.iniLabel = QLabel()
+        self.iniLabel.setStyleSheet("font-size: 36px; font:bold;")
+        self.iniLabel.setAlignment(Qt.AlignHCenter)
+        self.ini2Label = QLabel("Initiative")
+        self.ini2Label.setAlignment(Qt.AlignHCenter)
+        self.iniWidget.setLayout(self.iniLayout)
+
+        self.iniLayout.addWidget(self.iniLabel)
+        self.iniLayout.addWidget(self.ini2Label)
+
+        self.armourIniLayout.addWidget(self.armourWidget)
+        self.armourIniLayout.addWidget(self.iniWidget)
+
+        #
 
         # attacks
         self.attacksWidget = QWidget()
@@ -1306,7 +1349,7 @@ class mainFormDlg(QDialog) :
 
 
 
-
+        self.midColLayout.addWidget(self.armourIniWidget)
         self.midColLayout.addWidget(self.attacksWidget)
 
         self.saveButton = QPushButton("Save All")
@@ -1377,6 +1420,18 @@ class mainFormDlg(QDialog) :
         self.bottomRowLayout.setStretch(1,1)
         self.bottomRowLayout.setStretch(2,1)
 
+
+        self.classRaceLayout = QFormLayout()
+        self.classEdit = QLineEdit()
+        self.classEdit.setEnabled(False)
+        self.classEdit.setMinimumWidth(100)
+        self.raceEdit = QLineEdit()
+        self.raceEdit.setEnabled(False)
+        self.classRaceLayout.addRow("Class",self.classEdit)
+        self.classRaceLayout.addRow("Race",self.raceEdit)
+
+
+
         self.levelLayout = QFormLayout()
         self.levelEdit = QSpinBox()
         self.levelEdit.valueChanged.connect(self.updateLabels)
@@ -1392,6 +1447,7 @@ class mainFormDlg(QDialog) :
 
         self.topRowLayout.addWidget(self.characterNameLabel)
         self.topRowLayout.addStretch(1)
+        self.topRowLayout.addLayout(self.classRaceLayout)
         self.topRowLayout.addLayout(self.levelLayout)
 
         self.mainLayout.setStretchFactor(self.leftColLayout,1)

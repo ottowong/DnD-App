@@ -219,6 +219,9 @@ class mainFormDlg(QDialog) :
             self.proficiency = calculateProficiency.calcProficiency(self.levelEdit.value())
             self.proficiencyNumber.setText(str(self.proficiency))
 
+            self.iniLabel.setText(str(calculateAbilities.calcAbility(self.charDex)))
+            self.armourLabel.setText(str(10+calculateAbilities.calcAbility(self.charDex)))
+
             if(self.savStrBox.isChecked()):
                 strProf = self.proficiency
             else:
@@ -1267,7 +1270,42 @@ class mainFormDlg(QDialog) :
         self.midColLayout.addWidget(self.hpWidget)
         # self.midColLayout.addWidget(self.currentHpBox)
 
+        # armor class and initiation
+        self.armourIniWidget = QWidget()
+        # self.armourIniWidget.setStyleSheet(".QWidget{border: 1px solid #000000;}")
+        self.armourIniLayout = QHBoxLayout()
+        self.armourIniWidget.setLayout(self.armourIniLayout)
 
+        self.armourWidget = QWidget()
+        self.armourWidget.setStyleSheet(".QWidget{border: 1px solid #000000;}")
+        self.armourLayout = QVBoxLayout()
+        self.armourLabel = QLabel()
+        self.armourLabel.setStyleSheet("font-size: 36px; font:bold;")
+        self.armourLabel.setAlignment(Qt.AlignHCenter)
+        self.armour2Label = QLabel("Armour Class")
+        self.armour2Label.setAlignment(Qt.AlignHCenter)
+        self.armourWidget.setLayout(self.armourLayout)
+
+        self.armourLayout.addWidget(self.armourLabel)
+        self.armourLayout.addWidget(self.armour2Label)
+
+        self.iniWidget = QWidget()
+        self.iniWidget.setStyleSheet(".QWidget{border: 1px solid #000000;}")
+        self.iniLayout = QVBoxLayout()
+        self.iniLabel = QLabel()
+        self.iniLabel.setStyleSheet("font-size: 36px; font:bold;")
+        self.iniLabel.setAlignment(Qt.AlignHCenter)
+        self.ini2Label = QLabel("Initiative")
+        self.ini2Label.setAlignment(Qt.AlignHCenter)
+        self.iniWidget.setLayout(self.iniLayout)
+
+        self.iniLayout.addWidget(self.iniLabel)
+        self.iniLayout.addWidget(self.ini2Label)
+
+        self.armourIniLayout.addWidget(self.armourWidget)
+        self.armourIniLayout.addWidget(self.iniWidget)
+
+        #
 
         # attacks
         self.attacksWidget = QWidget()
@@ -1295,7 +1333,7 @@ class mainFormDlg(QDialog) :
 
 
 
-
+        self.midColLayout.addWidget(self.armourIniWidget)
         self.midColLayout.addWidget(self.attacksWidget)
 
         self.saveButton = QPushButton("Save All")
