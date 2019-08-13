@@ -4,12 +4,14 @@ import socketserver
 
 import pickle
 
+import calculateAbilities
+
 from random import randint
 
 ## Laptop
-# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 ## PC
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 
 cursor = cnxn.cursor()
 
@@ -1224,9 +1226,11 @@ WHERE attack_ID = ?
                 for combatCharacter in combatCharacters:
                     executeString = "select dex from Tbl_character where character_ID = ?"
                     cursor.execute(executeString, combatCharacter[0])
-                    names = cursor.fetchall()
+                    dexes = cursor.fetchall()
                     for dex in dexes:
-                        dex[0]
+                        currentRoll = randint(1,20) + calculateAbilities.calcAbility(dex[0])
+                        executeString = "update Tbl_combatCharacter set turnRoll = ? where combat_ID = ? and character_ID = ?"
+                        cursor.execute(executeString, currentRoll, combatId, combatCharacter[0])
 
 
                 # monsters
@@ -1236,10 +1240,11 @@ WHERE attack_ID = ?
                 for combatMonster in combatMonsters:
                     executeString = "select dex from Tbl_monster where monster_ID = ?"
                     cursor.execute(executeString, combatMonster[0])
-                    names = cursor.fetchall()
+                    dexes = cursor.fetchall()
                     for dex in dexes:
-                        dex[0]
-
+                        currentRoll = randint(1,20) + calculateAbilities.calcAbility(dex[0])
+                        executeString = "update Tbl_combatMonster set turnRoll = ? where combat_ID = ? and monster_ID = ?"
+                        cursor.execute(executeString, currentRoll, combatId, combatMonster[0])
 
             except Exception as e:
                 print("error: " + str(e))

@@ -8,11 +8,28 @@ import time
 import socket
 import pickle
 import calculateAbilities
-
 import bubbleSort
 
+import characterCombatWindow
 
 class mainFormDlg(QDialog) :
+
+    def turnOrderBoxClicked(self):
+        print("turnOrderBoxClicked")
+        self.currentClickedThing = (self.turnOrder[((self.turnOrderBox.indexFromItem(self.turnOrderBox.selectedItems()[0]).row()))])
+        if(self.currentClickedThing[3]):
+            print("character")
+            # self.currentClickedCharacter = self.currentClickedThing[0]
+            characterCombatWindow.mainFormDlg(self).show()
+        else:
+            print("monster")
+            # self.currentClickedMonster = self.currentClickedThing[0]
+
+    def characterBoxClicked(self):
+        print("characterBoxClicked")
+
+    def monsterBoxClicked(self):
+        print("monsterBoxClicked")
 
     def turnOrderClicked(self):
         try:
@@ -33,23 +50,6 @@ class mainFormDlg(QDialog) :
     def addMonsterClicked(self):
         print("addMonsterClicked")
 
-    def loginClicked(self):
-
-        try:
-            data=[2,self.parent().username,self.parent().password]
-            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
-            self.tcp_client.sendall(pickle.dumps(data))
-
-            received = pickle.loads(self.tcp_client.recv(1024))
-            print(received)
-
-
-        except Exception as e:
-            print(e)
-        finally:
-            self.tcp_client.close()
-
     def populateBoxes(self):
         try:
             data=[36,self.parent().username,self.parent().password,self.combatId]
@@ -68,12 +68,12 @@ class mainFormDlg(QDialog) :
             self.charNames = []
             for char in self.allCharacters:
                 self.charNames.append(char[1])
-                self.turnOrder.append(char)
+                self.turnOrder.append([ char[0], char[1], char[2], 1 ])
 
             self.monsterNames = []
             for monster in self.allMonsters:
                 self.monsterNames.append(monster[1])
-                self.turnOrder.append(monster)
+                self.turnOrder.append([ monster[0], monster[1], monster[2], 0 ])
 
             self.characterBox.clear()
             self.monsterBox.clear()
@@ -85,8 +85,9 @@ class mainFormDlg(QDialog) :
             self.turnOrderNames = []
             for i in range(0, len(self.turnOrder)):
                 self.turnOrderNames.append(str(i+1)+". "+self.turnOrder[i][1]+" ("+str(self.turnOrder[i][2])+")")
-
+            print("TURN ORDER")
             print(self.turnOrderNames)
+            print(self.turnOrder)
             self.turnOrderBox.clear()
             self.turnOrderBox.addItems(self.turnOrderNames)
 
@@ -110,9 +111,7 @@ class mainFormDlg(QDialog) :
         self.setWindowTitle('Combat')
         self.centerOnScreen()
 
-        self.submitButton = QPushButton("Login")
 
-        self.submitButton.clicked.connect(self.loginClicked)
 
         self.mainLayout = QHBoxLayout()
 
@@ -121,6 +120,7 @@ class mainFormDlg(QDialog) :
         self.turnOrderWidget.setLayout(self.turnOrderLayout)
         self.turnOrderLabel = QLabel("Turn Order")
         self.turnOrderBox = QListWidget()
+        self.turnOrderBox.itemClicked.connect(self.turnOrderBoxClicked)
         self.turnOrderButton = QPushButton("Roll for Turn Order")
         self.turnOrderButton.clicked.connect(self.turnOrderClicked)
         self.turnOrderButton.setDefault(False)
@@ -136,6 +136,7 @@ class mainFormDlg(QDialog) :
         self.characterWidget.setLayout(self.characterLayout)
         self.characterLabel = QLabel("Characters")
         self.characterBox = QListWidget()
+        self.characterBox.itemClicked.connect(self.characterBoxClicked)
         self.addCharacterButton = QPushButton("Add Character")
         self.addCharacterButton.clicked.connect(self.addCharacterClicked)
         self.addCharacterButton.setDefault(False)
@@ -151,6 +152,7 @@ class mainFormDlg(QDialog) :
         self.monsterWidget.setLayout(self.monsterLayout)
         self.monsterLabel = QLabel("Monsters")
         self.monsterBox = QListWidget()
+        self.monsterBox.itemClicked.connect(self.monsterBoxClicked)
         self.addMonsterButton = QPushButton("Add Monster")
         self.addMonsterButton.clicked.connect(self.addMonsterClicked)
         self.addMonsterButton.setDefault(False)
@@ -165,7 +167,6 @@ class mainFormDlg(QDialog) :
         self.mainLayout.addWidget(self.turnOrderWidget)
         self.mainLayout.addWidget(self.characterWidget)
         self.mainLayout.addWidget(self.monsterWidget)
-        # self.mainLayout.addWidget(self.submitButton)
 
         self.setLayout(self.mainLayout)
 

@@ -183,6 +183,7 @@ class mainFormDlg(QWidget):
         self.createCombatButton.setEnabled(False)
         self.gameRightWidget.setTabEnabled(2,False)
         self.updateGame()
+        self.updateCombat()
         self.mainLayout.setCurrentIndex(2)
         self.chatBox.clear()
         self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
