@@ -9,6 +9,7 @@ import re
 # import win32api, win32con, win32gui
 import socket
 import pickle
+
 import createGameWindow
 import createCharacterWindow
 import createMonsterWindow
@@ -16,7 +17,10 @@ import characterSheetWindow
 import monsterSheetWindow
 import passwordWindow
 import characterPasswordWindow
+import combatWindow
+
 import pyodbc
+
 
 class mainFormDlg(QWidget):
 
@@ -69,6 +73,23 @@ class mainFormDlg(QWidget):
 
         print("updated characters")
 
+    def updateCombat(self):
+        try:
+            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            data = [35,self.username,self.password,self.currentGameId]
+            self.tcp_client.connect((self.host_ip, self.server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
+
+            received = pickle.loads(self.tcp_client.recv(1024))
+            self.tcp_client.close()
+            print(received)
+            self.combatTable.clear()
+            self.combatTable.addItems(received[0])
+            self.combatIds = received[1]
+        except Exception as e:
+            print("error updating combat: ", e)
+
+
     # update the list of games after logging in
     def updateGames(self):
         self.gamesListBox.clear()
@@ -81,6 +102,7 @@ class mainFormDlg(QWidget):
         self.gameListFormatted = []
         self.gameList = []
         print("updating games")
+
         data = [5,self.username,self.password]
         self.tcp_client.connect((self.host_ip, self.server_port))
         self.tcp_client.sendall(pickle.dumps(data))
@@ -158,6 +180,7 @@ class mainFormDlg(QWidget):
 
         # self.characterSheetButton.setText(character[1])
         self.playerStatus = 1
+        self.createCombatButton.setEnabled(False)
         self.gameRightWidget.setTabEnabled(2,False)
         self.updateGame()
         self.mainLayout.setCurrentIndex(2)
@@ -235,8 +258,10 @@ class mainFormDlg(QWidget):
 
 
             self.playerStatus = 2
+            self.createCombatButton.setEnabled(True)
             self.gameRightWidget.setTabEnabled(2,True)
             self.updateGame()
+            self.updateCombat()
             self.mainLayout.setCurrentIndex(2)
             self.chatBox.clear()
             self.chatBox.addItem("Welcome to " + self.currentGameName + "\nType \"!r help\" \nfor help with dice commands.\n")
@@ -261,6 +286,12 @@ class mainFormDlg(QWidget):
         self.currentClickedMonster = self.monstersList[a.row()]
         print(self.monstersList[a.row()][0])
         self.showMonsterSheet()
+
+    def combatTableClicked(self):
+        self.currentClickedCombat = (self.combatIds[((self.combatTable.indexFromItem(self.combatTable.selectedItems()[0]).row()))])
+        combat = combatWindow.mainFormDlg(self)
+        combat.show()
+
 
     def populateCharTable(self, chars):
         for char in chars:
@@ -516,6 +547,9 @@ class mainFormDlg(QWidget):
     def createMonster(self):
         monster = createMonsterWindow.mainFormDlg(self)
         monster.exec_()
+
+    def createCombat(self):
+        pass
 
     def showCharacterSheet(self):
         charSheet = characterSheetWindow.mainFormDlg(self)
@@ -794,6 +828,24 @@ class mainFormDlg(QWidget):
         self.monsterModel.setHorizontalHeaderLabels(["Monster"])
         #
 
+        # combatTabWidget
+        self.combatTabWidget = QWidget()
+        self.combatTabLayout = QVBoxLayout()
+        self.combatTabWidget.setLayout(self.combatTabLayout)
+
+        self.createCombatButton = QPushButton("Create Combat")
+        self.createCombatButton.clicked.connect(self.createCombat)
+        self.createCombatButton.setEnabled(False)
+        self.combatTable = QListWidget()
+        self.combatTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.combatTable.itemClicked.connect(self.combatTableClicked)
+        self.combatModel = QStandardItemModel(self)
+        self.combatTabLayout.addWidget(self.combatTable)
+        self.combatTabLayout.addWidget(self.createCombatButton)
+        self.combatTabLayout.setStretch(0,1)
+        self.combatModel.setHorizontalHeaderLabels(["Monster"])
+        #
+
 
         # settingsTabWidget
         self.settingsTabWidget = QWidget()
@@ -804,6 +856,7 @@ class mainFormDlg(QWidget):
         self.gameRightWidget.addTab(self.chatTabWidget,"Chat")
         self.gameRightWidget.addTab(self.characterTabWidget,"Character")
         self.gameRightWidget.addTab(self.monsterTabWidget,"Monsters")
+        self.gameRightWidget.addTab(self.combatTabWidget,"Combat")
         self.gameRightWidget.setTabEnabled(2,False)
         # self.gameRightWidget.addTab(self.settingsTabWidget,"Settings")
         #

@@ -7,20 +7,14 @@ import pickle
 from random import randint
 
 ## Laptop
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-LJJ0KBS\\SQLEXPRESS;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 ## PC
-# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-F886FQR;DATABASE=DB_dnd2;Trusted_Connection=yes;')
 
 cursor = cnxn.cursor()
 
 class Handler_TCPServer(socketserver.BaseRequestHandler):
-    """
-    The TCP Server class for demonstration.
 
-    Note: We need to implement the Handle method to exchange data
-    with TCP client.
-
-    """
     def checkLoggedIn(self,u,p):
         loginSuccess=0
         userId = 0
@@ -1133,6 +1127,129 @@ WHERE attack_ID = ?
 
 
 
+        elif(self.data[0] == 35):
+            print("UPDATE COMBAT")
+            try:
+                executeString = "select combat_ID, name from Tbl_combat where game_ID = ?"
+                cursor.execute(executeString, self.data[3])
+                rows = cursor.fetchall()
+                allCombats = []
+                allCombatIds = []
+                for row in rows:
+                    allCombatIds.append(row[0])
+                    currentCombat = (str(row[1]) + "\n CHARACTERS:\n")
+                    # characters
+                    executeString = "select character_ID from Tbl_combatCharacter where combat_ID = ?"
+                    cursor.execute(executeString, row[0])
+                    combatCharacters = cursor.fetchall()
+                    for combatCharacter in combatCharacters:
+                        executeString = "select name from Tbl_character where character_ID = ?"
+                        cursor.execute(executeString, combatCharacter[0])
+                        names = cursor.fetchall()
+                        for name in names:
+                            currentCombat += ("  " + str(name[0]) + "\n")
+
+                    currentCombat += ("\n MONSTERS:\n")
+                    # monsters
+                    executeString = "select monster_ID from Tbl_combatMonster where combat_ID = ?"
+                    cursor.execute(executeString, row[0])
+                    combatMonsters = cursor.fetchall()
+                    for combatMonster in combatMonsters:
+                        executeString = "select name from Tbl_monster where monster_ID = ?"
+                        cursor.execute(executeString, combatMonster[0])
+                        names = cursor.fetchall()
+                        for name in names:
+                            currentCombat += ("  " + str(name[0]) + "\n")
+
+                    allCombats.append(currentCombat)
+
+
+
+
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps([allCombats,allCombatIds]))
+
+
+        elif(self.data[0] == 36):
+            print("GET COMBAT")
+            charsList = []
+            monstersList = []
+
+            try:
+
+                # characters
+                executeString = "select character_ID, turnRoll from Tbl_combatCharacter where combat_ID = ?"
+                cursor.execute(executeString, self.data[3])
+                combatCharacters = cursor.fetchall()
+                for combatCharacter in combatCharacters:
+                    executeString = "select name from Tbl_character where character_ID = ?"
+                    cursor.execute(executeString, combatCharacter[0])
+                    names = cursor.fetchall()
+                    for name in names:
+                        charsList.append([combatCharacter[0], name[0], combatCharacter[1]])
+
+
+                # monsters
+                executeString = "select monster_ID, turnRoll from Tbl_combatMonster where combat_ID = ?"
+                cursor.execute(executeString, self.data[3])
+                combatMonsters = cursor.fetchall()
+                for combatMonster in combatMonsters:
+                    executeString = "select name from Tbl_monster where monster_ID = ?"
+                    cursor.execute(executeString, combatMonster[0])
+                    names = cursor.fetchall()
+                    for name in names:
+                        monstersList.append([combatMonster[0], name[0], combatMonster[1]])
+
+
+            except Exception as e:
+                print("error: " + str(e))
+            print(charsList)
+            print(monstersList)
+            self.request.sendall(pickle.dumps([charsList, monstersList]))
+
+
+        elif(self.data[0] == 37):
+            print("INITIATIVE ROLLS")
+            charsList = []
+            monstersList = []
+            combatId = self.data[3]
+            try:
+
+                # characters
+                executeString = "select character_ID from Tbl_combatCharacter where combat_ID = ?"
+                cursor.execute(executeString, combatId)
+                combatCharacters = cursor.fetchall()
+                for combatCharacter in combatCharacters:
+                    executeString = "select dex from Tbl_character where character_ID = ?"
+                    cursor.execute(executeString, combatCharacter[0])
+                    names = cursor.fetchall()
+                    for dex in dexes:
+                        dex[0]
+
+
+                # monsters
+                executeString = "select monster_ID from Tbl_combatMonster where combat_ID = ?"
+                cursor.execute(executeString, self.data[3])
+                combatMonsters = cursor.fetchall()
+                for combatMonster in combatMonsters:
+                    executeString = "select dex from Tbl_monster where monster_ID = ?"
+                    cursor.execute(executeString, combatMonster[0])
+                    names = cursor.fetchall()
+                    for dex in dexes:
+                        dex[0]
+
+
+            except Exception as e:
+                print("error: " + str(e))
+            print(charsList)
+            print(monstersList)
+            self.request.sendall(pickle.dumps([charsList, monstersList]))
+
+
+
+
 
 
         else:
@@ -1149,3 +1266,21 @@ if __name__ == "__main__":
     # To abort the TCP server, press Ctrl-C.
 
     tcp_server.serve_forever()
+
+
+
+
+# elif(self.data[0] == 35):
+#     print("UPDATE COMBAT")
+#     success = 0
+#
+#     try:
+#         executeString = "select user_ID from Tbl_user where username = ? and password = ?"
+#         cursor.execute(executeString, self.data[1], self.data[2])
+#         rows = cursor.fetchall()
+#         for row in rows:
+#             userId = row[0]
+#     except Exception as e:
+#         print("error: " + str(e))
+#
+#     self.request.sendall(pickle.dumps([success]))
