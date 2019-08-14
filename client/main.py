@@ -946,7 +946,7 @@ class mainFormDlg(QWidget):
         try:
             file = open('ip.otto', 'r')
             file2 = open('port.otto', 'r')
-            self.host_ip = (file.read())
+            self.host_ip = str(file.read().strip())
             self.server_port = int(file2.read())
         except Exception as e:
             print(e)
@@ -958,10 +958,10 @@ class mainFormDlg(QWidget):
             file2.close()
             file = open('ip.otto', 'r')
             file2 = open('port.otto', 'r')
-            self.host_ip = (file.read())
+            self.host_ip = str(file.read().strip())
             self.server_port = int(file2.read())
 
-        # self.host_ip = "localhost"
+        # self.host_ip = "78.144.139.99"
         # self.server_port = 42069
         # fonts
         self.headerFont = QFont("Arial", 10, QFont.Bold);

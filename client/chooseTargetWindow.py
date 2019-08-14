@@ -64,7 +64,7 @@ class mainFormDlg(QDialog) :
     def attackClicked(self):
 
         print("target",self.currentClickedTarget)
-        if(type==1):
+        if(self.type==1):
             data=[38,self.parent().parent().parent().username,self.parent().parent().parent().password,self.attack,self.currentClickedTarget,self.currentId,self.combatId]
         else:
             data=[44,self.parent().parent().parent().username,self.parent().parent().parent().password,self.attack,self.currentClickedTarget,self.currentId,self.combatId]

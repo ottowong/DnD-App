@@ -463,13 +463,11 @@ for example:
 
         elif(self.data[0] == 12):
             print("GET ATTACKS FOR CHARACTER")
-            success = 0
-
             try:
+                reply = []
                 executeString = "select name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,attack_ID from Tbl_characterAttack where character_ID = ?"
                 cursor.execute(executeString, self.data[3])
                 rows = cursor.fetchall()
-                reply = []
                 for row in rows:
                     name = row[0]
                     proficient = row[1]
@@ -480,12 +478,10 @@ for example:
                     dmgMod = row[6]
                     id = row[7]
                     reply.append([name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,id])
-
-
-                print(reply)
             except Exception as e:
-                print("error: " + str(e))
-            self.request.sendall(pickle.dumps(reply))
+                print("error:", e)
+            finally:
+                self.request.sendall(pickle.dumps(reply))
 
         elif(self.data[0] == 13):
             print("GET ATTACK FOR EDITING")
