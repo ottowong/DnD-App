@@ -20,7 +20,7 @@ class mainFormDlg(QDialog) :
 
 
     def updateStats(self):
-        data=[11,self.parent().parent().username,self.parent().parent().password,self.currentId]
+        data=[26,self.parent().parent().username,self.parent().parent().password,self.currentId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
@@ -102,7 +102,7 @@ class mainFormDlg(QDialog) :
             self.attacksModel.appendRow(row)
 
     def fetchAttacks(self):
-        data=[12,self.parent().parent().username,self.parent().parent().password,self.currentId]
+        data=[31,self.parent().parent().username,self.parent().parent().password,self.currentId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.attacksList = []
         try:
@@ -139,7 +139,7 @@ class mainFormDlg(QDialog) :
         timer = time.perf_counter()
         self.setGeometry(0, 0, 300, 300)
 
-        self.type = 1
+        self.type = 0
 
         self.setWindowIcon(QIcon('images/icon.png'))
         self.setWindowTitle('Choose an Attack')
@@ -148,6 +148,7 @@ class mainFormDlg(QDialog) :
         self.currentThing = self.parent().currentClickedThing
         self.currentId = self.currentThing[0]
         self.combatId = self.parent().combatId
+
         print("thing")
         print(self.currentThing)
         print(self.currentId)

@@ -522,6 +522,11 @@ class mainFormDlg(QDialog) :
         if(msg == QMessageBox.Yes):
             self.delAttack(self.attacksList[a][7])
 
+    def refreshAll(self):
+        self.updateStats()
+        self.updateLabels()
+        self.updateBoxes()
+
     def delAttack(self, a):
         data = [16, self.parent().username,self.parent().password,a]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1345,9 +1350,7 @@ class mainFormDlg(QDialog) :
         self.attacksLabelRow.addWidget(self.newAttackButton)
 
 
-
-
-
+        
 
         self.midColLayout.addWidget(self.armourIniWidget)
         self.midColLayout.addWidget(self.attacksWidget)
@@ -1355,6 +1358,10 @@ class mainFormDlg(QDialog) :
         self.saveButton = QPushButton("Save All")
         self.saveButton.clicked.connect(self.saveAll)
         self.midColLayout.addWidget(self.saveButton)
+
+        self.refreshButton = QPushButton("Refresh")
+        self.refreshButton.clicked.connect(self.refreshAll)
+        self.midColLayout.addWidget(self.refreshButton)
 
         self.midColLayout.addStretch(1)
         #

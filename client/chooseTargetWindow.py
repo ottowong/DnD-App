@@ -62,8 +62,12 @@ class mainFormDlg(QDialog) :
         pass
 
     def attackClicked(self):
+
         print("target",self.currentClickedTarget)
-        data=[38,self.parent().parent().parent().username,self.parent().parent().parent().password,self.attack,self.currentClickedTarget,self.currentId,self.combatId]
+        if(type==1):
+            data=[38,self.parent().parent().parent().username,self.parent().parent().parent().password,self.attack,self.currentClickedTarget,self.currentId,self.combatId]
+        else:
+            data=[44,self.parent().parent().parent().username,self.parent().parent().parent().password,self.attack,self.currentClickedTarget,self.currentId,self.combatId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
@@ -103,6 +107,9 @@ class mainFormDlg(QDialog) :
         super(mainFormDlg, self).__init__(parent)
         timer = time.perf_counter()
         self.setGeometry(0, 0, 300, 350)
+
+        self.type = self.parent().type
+
         self.attack = self.parent().currentAttack
         self.combatId = self.parent().combatId
         self.currentId = self.parent().currentId

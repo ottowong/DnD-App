@@ -18,6 +18,7 @@ import monsterSheetWindow
 import passwordWindow
 import characterPasswordWindow
 import combatWindow
+import createCombatWindow
 
 import pyodbc
 
@@ -550,7 +551,7 @@ class mainFormDlg(QWidget):
         monster.exec_()
 
     def createCombat(self):
-        pass
+        createCombatWindow.mainFormDlg(self).exec()
 
     def showCharacterSheet(self):
         charSheet = characterSheetWindow.mainFormDlg(self)
@@ -942,8 +943,26 @@ class mainFormDlg(QWidget):
 
         self.resetVars()
 
-        self.host_ip = "localhost"
-        self.server_port = 42069
+        try:
+            file = open('ip.otto', 'r')
+            file2 = open('port.otto', 'r')
+            self.host_ip = (file.read())
+            self.server_port = int(file2.read())
+        except Exception as e:
+            print(e)
+            file = open('ip.otto', 'w+')
+            file2 = open('port.otto', 'w+')
+            file.write("localhost")
+            file2.write("42069")
+            file.close()
+            file2.close()
+            file = open('ip.otto', 'r')
+            file2 = open('port.otto', 'r')
+            self.host_ip = (file.read())
+            self.server_port = int(file2.read())
+
+        # self.host_ip = "localhost"
+        # self.server_port = 42069
         # fonts
         self.headerFont = QFont("Arial", 10, QFont.Bold);
         #

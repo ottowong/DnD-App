@@ -11,8 +11,78 @@ import calculateAbilities
 import bubbleSort
 
 import characterCombatWindow
+import monsterCombatWindow
+import addMonsterWindow
+import addCharacterWindow
 
 class mainFormDlg(QDialog) :
+
+    def deleteCombat(self):
+        msg = QMessageBox.question(self, "Confirm", "Are you sure you want to delete this combat?", QMessageBox.Yes|QMessageBox.No)
+        if(msg == QMessageBox.Yes):
+            data=[47,self.parent().username,self.parent().password,self.combatId]
+            self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.attacksList = []
+            try:
+                self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
+                self.tcp_client.sendall(pickle.dumps(data))
+
+                received = pickle.loads(self.tcp_client.recv(1024))
+                print(received)
+
+            except Exception as e:
+                msg = QMessageBox(self)
+                msg.setText("An error occurred")
+                msg.setWindowTitle("Error")
+                # msg.setDetailedText(errorString)
+                msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                # msg.buttonClicked.connect(self.ok)
+                msg.exec_()
+                print("error:",e)
+
+            self.parent().updateCombat()
+            self.close()
+
+    def removeMonsterClicked(self):
+        self.removeList = []
+        for i in range(0,len(self.monsterBox.selectedItems())):
+            self.removeList.append(self.allMonsters[((self.monsterBox.indexFromItem(self.monsterBox.selectedItems()[i]).row()))][0])
+        self.removeThing(0)
+
+    def removeCharacterClicked(self):
+        self.removeList = []
+        for i in range(0,len(self.characterBox.selectedItems())):
+            self.removeList.append(self.allCharacters[((self.characterBox.indexFromItem(self.characterBox.selectedItems()[i]).row()))][0])
+        self.removeThing(1)
+
+    def removeThing(self, a):
+        print(a)
+        print(self.removeList)
+
+        data=[46,self.parent().username,self.parent().password,a,self.removeList,self.combatId]
+        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.attacksList = []
+        try:
+            self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
+            self.tcp_client.sendall(pickle.dumps(data))
+
+            received = pickle.loads(self.tcp_client.recv(1024))
+            print(received)
+
+        except Exception as e:
+            msg = QMessageBox(self)
+            msg.setText("An error occurred")
+            msg.setWindowTitle("Error")
+            # msg.setDetailedText(errorString)
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            # msg.buttonClicked.connect(self.ok)
+            msg.exec_()
+            print("error:",e)
+
+        self.populateBoxes()
+
+
+
 
     def turnOrderBoxClicked(self):
         print("turnOrderBoxClicked")
@@ -27,6 +97,7 @@ class mainFormDlg(QDialog) :
         else:
             if(self.parent().playerStatus == 2):
                 print("monster")
+                monsterCombatWindow.mainFormDlg(self).show()
 
     def characterBoxClicked(self):
         print("characterBoxClicked")
@@ -49,9 +120,11 @@ class mainFormDlg(QDialog) :
 
     def addCharacterClicked(self):
         print("addCharacterClicked")
+        addCharacterWindow.mainFormDlg(self).show()
 
     def addMonsterClicked(self):
         print("addMonsterClicked")
+        addMonsterWindow.mainFormDlg(self).show()
 
     def populateBoxes(self):
         try:
@@ -115,57 +188,77 @@ class mainFormDlg(QDialog) :
         self.centerOnScreen()
 
 
-
+        self.gameId = self.parent().currentGameId
         self.mainLayout = QHBoxLayout()
 
         self.turnOrderWidget = QWidget()
         self.turnOrderLayout = QVBoxLayout()
         self.turnOrderWidget.setLayout(self.turnOrderLayout)
-        self.turnOrderLabel = QLabel("Turn Order")
+        self.turnOrderLabel = QLabel("Turn Order (Click for Attacks)")
         self.turnOrderBox = QListWidget()
         self.turnOrderBox.itemClicked.connect(self.turnOrderBoxClicked)
         self.turnOrderButton = QPushButton("Roll for Turn Order")
+        self.deleteCombatButton = QPushButton("Delete Combat")
         self.turnOrderButton.clicked.connect(self.turnOrderClicked)
+        self.deleteCombatButton.clicked.connect(self.deleteCombat)
         self.turnOrderButton.setDefault(False)
         self.turnOrderButton.setAutoDefault(False)
+        self.deleteCombatButton.setDefault(False)
+        self.deleteCombatButton.setAutoDefault(False)
         self.turnOrderLayout.addWidget(self.turnOrderLabel)
         self.turnOrderLayout.addWidget(self.turnOrderBox)
         self.turnOrderLayout.addWidget(self.turnOrderButton)
-        if(self.parent().playerStatus != 2):
-            self.turnOrderButton.setEnabled(False)
+        self.turnOrderLayout.addWidget(self.deleteCombatButton)
 
         self.characterWidget = QWidget()
         self.characterLayout = QVBoxLayout()
         self.characterWidget.setLayout(self.characterLayout)
         self.characterLabel = QLabel("Characters")
         self.characterBox = QListWidget()
+        self.characterBox.setSelectionMode(QListWidget.ExtendedSelection)
         self.characterBox.itemClicked.connect(self.characterBoxClicked)
         self.addCharacterButton = QPushButton("Add Character")
+        self.removeCharacterButton = QPushButton("Remove Character")
         self.addCharacterButton.clicked.connect(self.addCharacterClicked)
+        self.removeCharacterButton.clicked.connect(self.removeCharacterClicked)
         self.addCharacterButton.setDefault(False)
         self.addCharacterButton.setAutoDefault(False)
+        self.removeCharacterButton.setDefault(False)
+        self.removeCharacterButton.setAutoDefault(False)
         self.characterLayout.addWidget(self.characterLabel)
         self.characterLayout.addWidget(self.characterBox)
         self.characterLayout.addWidget(self.addCharacterButton)
-        if(self.parent().playerStatus != 2):
-            self.addCharacterButton.setEnabled(False)
+        self.characterLayout.addWidget(self.removeCharacterButton)
 
         self.monsterWidget = QWidget()
         self.monsterLayout = QVBoxLayout()
         self.monsterWidget.setLayout(self.monsterLayout)
         self.monsterLabel = QLabel("Monsters")
         self.monsterBox = QListWidget()
+        self.monsterBox.setSelectionMode(QListWidget.ExtendedSelection)
         self.monsterBox.itemClicked.connect(self.monsterBoxClicked)
         self.addMonsterButton = QPushButton("Add Monster")
+        self.removeMonsterButton = QPushButton("Remove Monster")
         self.addMonsterButton.clicked.connect(self.addMonsterClicked)
+        self.removeMonsterButton.clicked.connect(self.removeMonsterClicked)
         self.addMonsterButton.setDefault(False)
         self.addMonsterButton.setAutoDefault(False)
+        self.removeMonsterButton.setDefault(False)
+        self.removeMonsterButton.setAutoDefault(False)
         self.monsterLayout.addWidget(self.monsterLabel)
         self.monsterLayout.addWidget(self.monsterBox)
         self.monsterLayout.addWidget(self.addMonsterButton)
-        if(self.parent().playerStatus != 2):
-            self.addMonsterButton.setEnabled(False)
+        self.monsterLayout.addWidget(self.removeMonsterButton)
 
+
+
+        if(self.parent().playerStatus != 2):
+            self.turnOrderButton.setEnabled(False)
+            self.addMonsterButton.setEnabled(False)
+            self.removeMonsterButton.setEnabled(False)
+            self.addCharacterButton.setEnabled(False)
+            self.removeCharacterButton.setEnabled(False)
+            self.deleteCombatButton.setEnabled(False)
 
         self.mainLayout.addWidget(self.turnOrderWidget)
         self.mainLayout.addWidget(self.characterWidget)

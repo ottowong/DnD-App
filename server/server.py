@@ -678,7 +678,6 @@ VALUES
             self.request.sendall(pickle.dumps(success))
 
 
-        # just send back ACK for data arrival confirmation
         elif(self.data[0] == 19):
             print("GET RACES")
             success = 0
@@ -1247,6 +1246,7 @@ WHERE attack_ID = ?
                         currentRoll = randint(1,20) + calculateAbilities.calcAbility(dex[0])
                         executeString = "update Tbl_combatCharacter set turnRoll = ? where combat_ID = ? and character_ID = ?"
                         cursor.execute(executeString, currentRoll, combatId, combatCharacter[0])
+                        cnxn.commit()
 
 
                 # monsters
@@ -1261,6 +1261,7 @@ WHERE attack_ID = ?
                         currentRoll = randint(1,20) + calculateAbilities.calcAbility(dex[0])
                         executeString = "update Tbl_combatMonster set turnRoll = ? where combat_ID = ? and monster_ID = ?"
                         cursor.execute(executeString, currentRoll, combatId, combatMonster[0])
+                        cnxn.commit()
 
             except Exception as e:
                 print("error: " + str(e))
@@ -1363,7 +1364,7 @@ WHERE attack_ID = ?
                             print("some sort of error")
                     except Exception as e:
                         print(e)
-                    print(counter)
+                    print("counter", counter)
                     newHp = targetHp-counter
                     if(newHp < 0):
                         newHp = 0
@@ -1373,16 +1374,17 @@ WHERE attack_ID = ?
                             cursor.execute(executeString, target[0], combatId)
                         else:
                             executeString = "delete from Tbl_combatMonster where monster_ID = ? and combat_ID = ?"
+                            print(executeString, target[0], combatId)
                             cursor.execute(executeString, target[0], combatId)
+                        cnxn.commit()
 
                     if(target[3]):
-                        cursor.execute(executeString, newHp, target[0])
                         executeString = "update Tbl_character set currentHp = ? where character_ID = ?"
+                        cursor.execute(executeString, newHp, target[0])
                     else:
                         executeString = "update Tbl_monster set currentHp = ? where monster_ID = ?"
                         cursor.execute(executeString, newHp, target[0])
-
-
+                    cnxn.commit()
 
             # try:
             #     executeString = "select user_ID from Tbl_user where username = ? and password = ?"
@@ -1395,16 +1397,386 @@ WHERE attack_ID = ?
             self.request.sendall(pickle.dumps([success,counter,dead]))
 
 
+        elif(self.data[0] == 39):
+            print("GET MONSTERS NOT ALREADY IN COMBAT")
+            success = 0
+            gameId = self.data[3]
+            combatId = self.data[4]
+
+            try:
+                executeString = "select user_ID from Tbl_game where game_ID = ?"
+                cursor.execute(executeString,gameId)
+                rows = cursor.fetchall()
+                for row in rows:
+                    dmId = row[0]
+                executeString = "select monster_ID, name from Tbl_monster where user_ID = ?"
+                cursor.execute(executeString,dmId)
+                rows = cursor.fetchall()
+                monstersToSend = []
+                for row in rows:
+                    addFlag = True
+                    currentMonsterId = row[0]
+                    currentName = row[1]
+                    executeString = "select combatMonster_ID from Tbl_combatMonster where monster_ID = ? and combat_ID = ?"
+                    cursor.execute(executeString,currentMonsterId,combatId)
+                    things = cursor.fetchall()
+                    for thing in things:
+                        addFlag = False
+                    if(addFlag):
+                        monstersToSend.append([currentMonsterId,currentName])
 
 
+
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps(monstersToSend))
+
+
+
+        elif(self.data[0] == 40):
+            print("DUPLICATE MONSTER")
+            monsterId = self.data[3]
+            name = self.data[4]
+            success = 0
+            try:
+                executeString = "select user_ID, str, int, dex, con, wis, cha, savStr, savDex, savCon, savInt, savWis, savCha, acrobatics, animalHandling, arcana, athletics, deception, history, insight, intimidation, investigation, medicine, nature, perception, performance, persuasion, religion, sleightOfHand, stealth, survival, currentHp, maxHp, lvl, personalityTraits, ideals, bonds, flaws from Tbl_monster where monster_ID = ?"
+                cursor.execute(executeString, monsterId)
+                rows = cursor.fetchall()
+                for row in rows:
+                    print(row[0])
+                    userId = row[0]
+                    strA = row[1]
+                    intA = row[2]
+                    dexA = row[3]
+                    conA = row[4]
+                    wisA = row[5]
+                    chaA = row[6]
+                    savStr = row[7]
+                    savDex = row[8]
+                    savCon = row[9]
+                    savInt = row[10]
+                    savWis = row[11]
+                    savCha = row[12]
+                    acrobatics = row[13]
+                    animalHandling = row[14]
+                    arcana = row[15]
+                    athletics = row[16]
+                    deception = row[17]
+                    history = row[18]
+                    insight = row[19]
+                    intimidation = row[20]
+                    investigation = row[21]
+                    medicine = row[22]
+                    nature = row[23]
+                    perception = row[24]
+                    performance = row[25]
+                    persuasion = row[26]
+                    religion = row[27]
+                    sleightOfHand = row[28]
+                    stealth = row[29]
+                    survival = row[30]
+                    currentHp = row[31]
+                    maxHp = row[32]
+                    lvl = row[33]
+                    personalityTraits = row[34]
+                    ideals = row[35]
+                    bonds = row[36]
+                    flaws = row[37]
+
+                executeString = "insert into Tbl_monster (user_ID, name, str, int, dex, con, wis, cha, savStr, savDex, savCon, savInt, savWis, savCha, acrobatics, animalHandling, arcana, athletics, deception, history, insight, intimidation, investigation, medicine, nature, perception, performance, persuasion, religion, sleightOfHand, stealth, survival, currentHp, maxHp, lvl, personalityTraits, ideals, bonds, flaws) Output Inserted.monster_ID values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                cursor.execute(executeString, userId, name, strA, intA, dexA, conA, wisA, chaA, savStr, savDex, savCon, savInt, savWis, savCha, acrobatics, animalHandling, arcana, athletics, deception, history, insight, intimidation, investigation, medicine, nature, perception, performance, persuasion, religion, sleightOfHand, stealth, survival, currentHp, maxHp, lvl, personalityTraits, ideals, bonds, flaws)
+                rows = cursor.fetchall()
+                cnxn.commit()
+                for row in rows:
+                    newMonsterId = row[0]
+
+                executeString = "select name, proficient, toHitStat, toHitMod, dmgDice, dmgStat, dmgMod from Tbl_monsterAttack where monster_ID = ?"
+                cursor.execute(executeString, monsterId)
+                rows = cursor.fetchall()
+                allAttacks = []
+                for row in rows:
+                    name = row[0]
+                    proficient = row[1]
+                    toHitStat = row[2]
+                    toHitMod = row[3]
+                    dmgDice = row[4]
+                    dmgStat = row[5]
+                    dmgMod = row[6]
+
+                    executeString = "insert into Tbl_monsterAttack (name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,monster_ID) values (?,?,?,?,?,?,?,?)"
+                    cursor.execute(executeString,name,proficient,toHitStat,toHitMod,dmgDice,dmgStat,dmgMod,newMonsterId)
+                cnxn.commit()
+                success = 1
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps([success]))
+
+
+        elif(self.data[0] == 41):
+            print("ADD MONSTERS TO COMBAT")
+            success = 0
+            monsterIds = self.data[3]
+            combatId = self.data[4]
+            try:
+                for id in monsterIds:
+                    executeString = "select dex from Tbl_monster where monster_ID = ?"
+                    cursor.execute(executeString,id)
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        currentRoll = (randint(1,20) + calculateAbilities.calcAbility(row[0]))
+
+                    executeString = "insert into Tbl_combatMonster (combat_ID, monster_ID, turnRoll) values (?,?,?)"
+                    cursor.execute(executeString, combatId, id, currentRoll)
+                    cnxn.commit()
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps([success]))
+
+        elif(self.data[0] == 42):
+            print("GET CHARACTERS NOT ALREADY IN COMBAT")
+            success = 0
+            gameId = self.data[3]
+            combatId = self.data[4]
+
+            try:
+                executeString = "select character_ID, name from Tbl_character where game_ID = ?"
+                cursor.execute(executeString,gameId)
+                rows = cursor.fetchall()
+                monstersToSend = []
+                for row in rows:
+                    addFlag = True
+                    currentMonsterId = row[0]
+                    currentName = row[1]
+                    executeString = "select combatCharacter_ID from Tbl_combatCharacter where character_ID = ? and combat_ID = ?"
+                    cursor.execute(executeString,currentMonsterId,combatId)
+                    things = cursor.fetchall()
+                    for thing in things:
+                        addFlag = False
+                    if(addFlag):
+                        monstersToSend.append([currentMonsterId,currentName])
+
+
+
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps(monstersToSend))
+
+        elif(self.data[0] == 43):
+            print("ADD CHARACTERS TO COMBAT")
+            success = 0
+            monsterIds = self.data[3]
+            combatId = self.data[4]
+            try:
+                for id in monsterIds:
+                    executeString = "select dex from Tbl_character where character_ID = ?"
+                    cursor.execute(executeString,id)
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        currentRoll = (randint(1,20) + calculateAbilities.calcAbility(row[0]))
+
+                    executeString = "insert into Tbl_combatCharacter (combat_ID, character_ID, turnRoll) values (?,?,?)"
+                    cursor.execute(executeString, combatId, id, currentRoll)
+                    cnxn.commit()
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps([success]))
+
+
+
+        elif(self.data[0] == 44):
+            print("ATTACK SOMETHING (WITH MONSTER)")
+            success = 0
+            attack = self.data[3]
+            target = self.data[4]
+            characterId = self.data[5]
+            combatId = self.data[6]
+
+            print(attack)
+            print(target)
+
+            try:
+                executeString = "select str, dex, con, int, wis, cha, lvl from Tbl_monster where monster_ID = ?"
+                cursor.execute(executeString, characterId)
+                rows = cursor.fetchall()
+                for row in rows:
+                    toHitMod = calculateAbilities.calcAbility(row[attack[2]])
+                    damageMod = calculateAbilities.calcAbility(row[attack[5]])
+                    lvl = row[6]
+                toHitMod += attack[3]
+                if(attack[1]):
+                    toHitMod += calculateProficiency.calcProficiency(lvl)
+                print("hitstat",toHitMod)
+
+                if(target[3]):
+                    executeString = "select dex, currentHp from Tbl_character where character_ID = ?"
+                else:
+                    executeString = "select dex, currentHp from Tbl_monster where monster_ID = ?"
+                cursor.execute(executeString, target[0])
+                rows = cursor.fetchall()
+                for row in rows:
+                    armourClass = 10 + calculateAbilities.calcAbility(row[0])
+                    targetHp = row[1]
+
+                roll = (randint(1,20)+toHitMod)
+                print("roll: ",roll)
+                print("armour class: ",armourClass)
+                counter = 0
+                dead = 0
+                if(roll > armourClass):
+                    success = 1
+                    damageDice = attack[4]
+                    print("damageMod: ",damageMod)
+                    damageMod += attack[6]
+                    print("damageMod: ",damageMod)
+
+                    try:
+                        maxModifier = 1000
+                        maxNumberOfRolls = 10
+                        maxNumberOfDice = 10
+                        maxSides = 1000
+
+                        counter = damageMod
+                        invalid = False
+
+                        messagestring = damageDice
+                        reply = 1
+                        if(messagestring == "!r"):
+                            messagestring = "!r1d20"
+                        rollstring = ("DICE: "+str(self.data[1])+" rolled: ")
+                        rollsList = messagestring.split("+")
+                        for i in range(0,len(rollsList)):
+                            rollsList[i] = rollsList[i].split("d")
+                        if(len(rollsList) > maxNumberOfDice):
+                            invalid = True
+                        else:
+                            for i in range(0,len(rollsList)):
+                                if(len(rollsList[i]) == 2):
+                                    if(int(rollsList[i][0]) <= maxNumberOfRolls and int(rollsList[i][1]) <= maxSides):
+                                        rollstring += "\n"+str(rollsList[i][0])+" d"+str(rollsList[i][1])+":"
+                                        for a in range(0, int(rollsList[i][0])):
+                                            rando = (randint(1, int(rollsList[i][1])))
+                                            counter += rando
+                                            if (a != 0):
+                                                rollstring += ","
+                                            rollstring += " "+str(rando)
+                                    else:
+                                        invalid = True
+                                elif(len(rollsList[i]) == 1):
+                                    if (int(rollsList[i][0]) > maxModifier):
+                                        invalid = True
+                                    else:
+                                        counter += int(rollsList[i][0])
+                                        rollstring += "\n+ "+str(rollsList[i][0])
+                                # this should never happen
+                                else:
+                                    invalid = True
+                        if(invalid == False):
+                            rollstring += "\nresulting in: **"+str(counter)+"**"
+                            print(rollstring)
+                        else:
+                            print("some sort of error")
+                    except Exception as e:
+                        print(e)
+                    print("counter", counter)
+                    newHp = targetHp-counter
+                    if(newHp < 0):
+                        newHp = 0
+                        dead = 1
+                        if(target[3]):
+                            executeString = "delete from Tbl_combatCharacter where character_ID = ? and combat_ID = ?"
+                            cursor.execute(executeString, target[0], combatId)
+                        else:
+                            executeString = "delete from Tbl_combatMonster where monster_ID = ? and combat_ID = ?"
+                            print(executeString, target[0], combatId)
+                            cursor.execute(executeString, target[0], combatId)
+                        cnxn.commit()
+
+                    if(target[3]):
+                        executeString = "update Tbl_character set currentHp = ? where character_ID = ?"
+                        cursor.execute(executeString, newHp, target[0])
+                    else:
+                        executeString = "update Tbl_monster set currentHp = ? where monster_ID = ?"
+                        cursor.execute(executeString, newHp, target[0])
+                    cnxn.commit()
+
+            # try:
+            #     executeString = "select user_ID from Tbl_user where username = ? and password = ?"
+            #     cursor.execute(executeString, self.data[1], self.data[2])
+            #     rows = cursor.fetchall()
+            #     for row in rows:
+            #         userId = row[0]
+            except Exception as e:
+                print("error: " + str(e))
+            self.request.sendall(pickle.dumps([success,counter,dead]))
+
+        elif(self.data[0] == 45):
+            print("CREATE COMBAT")
+            success = 0
+
+            try:
+                executeString = "insert Tbl_combat (name, game_ID) values (?, ?)"
+                cursor.execute(executeString, self.data[3], self.data[4])
+                cnxn.commit()
+                success = 1
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps([success]))
+
+        elif(self.data[0] == 46):
+            print("REMOVE COMBATMONSTER/CHARACTER")
+            success = 0
+            combatId = self.data[5]
+
+            try:
+                for id in self.data[4]:
+
+                    if(self.data[3]):
+                        executeString = "delete from Tbl_combatCharacter where character_ID = ? and combat_ID = ?"
+                        cursor.execute(executeString, id, combatId)
+                    else:
+                        executeString = "delete from Tbl_combatMonster where monster_ID = ? and combat_ID = ?"
+                        cursor.execute(executeString, id, combatId)
+                cnxn.commit()
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps([success]))
+
+        elif(self.data[0] == 47):
+            print("DELETE COMBAT")
+            success = 0
+            combatId = self.data[3]
+
+            try:
+                executeString = "delete from Tbl_combat where combat_ID = ?"
+                cursor.execute(executeString, combatId)
+
+                cnxn.commit()
+            except Exception as e:
+                print("error: " + str(e))
+
+            self.request.sendall(pickle.dumps([success]))
 
         else:
             print(self.data[0])
             self.request.sendall(pickle.dumps("message received"))
 
+
+
+
+
+
+
+
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 42069
-    print("server running")
+    HOST, PORT = "0.0.0.0", 42069
+    print("server running on port:",PORT)
     # Init the TCP server object, bind it to the localhost on 42069 port
     tcp_server = socketserver.TCPServer((HOST, PORT), Handler_TCPServer)
 

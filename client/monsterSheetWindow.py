@@ -16,9 +16,13 @@ import calculateProficiency
 
 import createMonsterAttackWindow
 import editMonsterAttackWindow
-
+import duplicateMonsterWindow
 
 class mainFormDlg(QDialog) :
+
+    def duplicateMonster(self):
+        duplicateMonsterWindow.mainFormDlg(self).show()
+
     def deleteMonster(self):
         msg = QMessageBox.question(self, "Confirm", "Are you sure you want to delete "+str(self.monsterName)+"?", QMessageBox.Yes|QMessageBox.No)
         # msg.setText("Are you sure you want to delete "+str(self.characterList[index][1])+"?")
@@ -27,6 +31,11 @@ class mainFormDlg(QDialog) :
         # msg.setDetailedText(errorString)
         if(msg == QMessageBox.Yes):
             self.delMonster()
+
+    def refreshAll(self):
+        self.updateStats()
+        self.updateLabels()
+        self.updateBoxes()
 
     def delMonster(self):
         data = [34, self.parent().username,self.parent().password,self.monsterId]
@@ -103,6 +112,8 @@ class mainFormDlg(QDialog) :
 
         received = pickle.loads(self.tcp_client.recv(1024))
         self.tcp_client.close()
+
+        self.parent().updateMonsters()
 
     def statRoll(self, modifier, stat):
         message = "!r1d20+"+modifier
@@ -1340,8 +1351,17 @@ class mainFormDlg(QDialog) :
         self.deleteButton = QPushButton("Delete Monster")
         self.deleteButton.clicked.connect(self.deleteMonster)
         self.saveButton.clicked.connect(self.saveAll)
+
+        self.refreshButton = QPushButton("Refresh")
+        self.refreshButton.clicked.connect(self.refreshAll)
+
+        self.duplicateButton = QPushButton("Duplicate Monster")
+        self.duplicateButton.clicked.connect(self.duplicateMonster)
+
         self.midColLayout.addWidget(self.saveButton)
+        self.midColLayout.addWidget(self.refreshButton)
         self.midColLayout.addWidget(self.deleteButton)
+        self.midColLayout.addWidget(self.duplicateButton)
 
         self.midColLayout.addStretch(1)
         #
