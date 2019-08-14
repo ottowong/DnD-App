@@ -11,6 +11,11 @@ import bubbleSort
 
 class mainFormDlg(QDialog) :
 
+    def targetClicked(self):
+        self.submitButton.setEnabled(True)
+        self.currentClickedTarget = (self.turnOrder[((self.targetsBox.indexFromItem(self.targetsBox.selectedItems()[0]).row()))])
+        print(self.currentClickedTarget)
+
     def populateBoxes(self):
         try:
             data=[36,self.parent().parent().parent().username,self.parent().parent().parent().password,self.combatId]
@@ -57,15 +62,33 @@ class mainFormDlg(QDialog) :
         pass
 
     def attackClicked(self):
-        data=[1,name,password]
+        print("target",self.currentClickedTarget)
+        data=[38,self.parent().parent().parent().username,self.parent().parent().parent().password,self.attack,self.currentClickedTarget,self.currentId,self.combatId]
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
-            self.tcp_client.connect((self.parent().host_ip, self.parent().server_port))
+            self.tcp_client.connect((self.parent().parent().parent().host_ip, self.parent().parent().parent().server_port))
             self.tcp_client.sendall(pickle.dumps(data))
 
             received = pickle.loads(self.tcp_client.recv(1024))
-            print(received)
+            if(received[0]):
+                msg = QMessageBox(self)
+                msg.setText("Your attack hit!")
+                if(received[2]):
+                    msg.setInformativeText("You dealt "+str(received[1])+" damage!\nTarget is dead!")
+                    self.parent().parent().populateBoxes()
+                    self.populateBoxes()
+                else:
+                    msg.setInformativeText("You dealt "+str(received[1])+" damage!")
+                msg.setWindowTitle("Hit!")
+                msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                msg.exec_()
+            else:
+                msg = QMessageBox(self)
+                msg.setText("Your attack missed!")
+                msg.setWindowTitle("Miss!")
+                msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                msg.exec_()
 
         finally:
             self.tcp_client.close()
@@ -80,17 +103,19 @@ class mainFormDlg(QDialog) :
         super(mainFormDlg, self).__init__(parent)
         timer = time.perf_counter()
         self.setGeometry(0, 0, 300, 350)
-
-        self.dice = self.parent().currentDice
+        self.attack = self.parent().currentAttack
         self.combatId = self.parent().combatId
+        self.currentId = self.parent().currentId
 
         self.setWindowIcon(QIcon('images/icon.png'))
         self.setWindowTitle('Choose Target')
         self.centerOnScreen()
 
         self.targetsBox = QListWidget()
+        self.targetsBox.itemClicked.connect(self.targetClicked)
 
         self.submitButton = QPushButton("Attack!")
+        self.submitButton.setEnabled(False)
         self.submitButton.clicked.connect(self.attackClicked)
 
         self.mainLayout = QVBoxLayout()

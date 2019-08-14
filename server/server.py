@@ -5,6 +5,7 @@ import socketserver
 import pickle
 
 import calculateAbilities
+import calculateProficiency
 
 from random import randint
 
@@ -1267,6 +1268,131 @@ WHERE attack_ID = ?
             print(monstersList)
             self.request.sendall(pickle.dumps([charsList, monstersList]))
 
+
+        elif(self.data[0] == 38):
+            print("ATTACK SOMETHING (WITH CHARACTER)")
+            success = 0
+            attack = self.data[3]
+            target = self.data[4]
+            characterId = self.data[5]
+            combatId = self.data[6]
+
+            print(attack)
+            print(target)
+
+            try:
+                executeString = "select str, dex, con, int, wis, cha, lvl from Tbl_character where character_ID = ?"
+                cursor.execute(executeString, characterId)
+                rows = cursor.fetchall()
+                for row in rows:
+                    toHitMod = calculateAbilities.calcAbility(row[attack[2]])
+                    damageMod = calculateAbilities.calcAbility(row[attack[5]])
+                    lvl = row[6]
+                toHitMod += attack[3]
+                if(attack[1]):
+                    toHitMod += calculateProficiency.calcProficiency(lvl)
+                print("hitstat",toHitMod)
+
+                if(target[3]):
+                    executeString = "select dex, currentHp from Tbl_character where character_ID = ?"
+                else:
+                    executeString = "select dex, currentHp from Tbl_monster where monster_ID = ?"
+                cursor.execute(executeString, target[0])
+                rows = cursor.fetchall()
+                for row in rows:
+                    armourClass = 10 + calculateAbilities.calcAbility(row[0])
+                    targetHp = row[1]
+
+                roll = (randint(1,20)+toHitMod)
+                print("roll: ",roll)
+                print("armour class: ",armourClass)
+                counter = 0
+                dead = 0
+                if(roll > armourClass):
+                    success = 1
+                    damageDice = attack[4]
+                    print("damageMod: ",damageMod)
+                    damageMod += attack[6]
+                    print("damageMod: ",damageMod)
+
+                    try:
+                        maxModifier = 1000
+                        maxNumberOfRolls = 10
+                        maxNumberOfDice = 10
+                        maxSides = 1000
+
+                        counter = damageMod
+                        invalid = False
+
+                        messagestring = damageDice
+                        reply = 1
+                        if(messagestring == "!r"):
+                            messagestring = "!r1d20"
+                        rollstring = ("DICE: "+str(self.data[1])+" rolled: ")
+                        rollsList = messagestring.split("+")
+                        for i in range(0,len(rollsList)):
+                            rollsList[i] = rollsList[i].split("d")
+                        if(len(rollsList) > maxNumberOfDice):
+                            invalid = True
+                        else:
+                            for i in range(0,len(rollsList)):
+                                if(len(rollsList[i]) == 2):
+                                    if(int(rollsList[i][0]) <= maxNumberOfRolls and int(rollsList[i][1]) <= maxSides):
+                                        rollstring += "\n"+str(rollsList[i][0])+" d"+str(rollsList[i][1])+":"
+                                        for a in range(0, int(rollsList[i][0])):
+                                            rando = (randint(1, int(rollsList[i][1])))
+                                            counter += rando
+                                            if (a != 0):
+                                                rollstring += ","
+                                            rollstring += " "+str(rando)
+                                    else:
+                                        invalid = True
+                                elif(len(rollsList[i]) == 1):
+                                    if (int(rollsList[i][0]) > maxModifier):
+                                        invalid = True
+                                    else:
+                                        counter += int(rollsList[i][0])
+                                        rollstring += "\n+ "+str(rollsList[i][0])
+                                # this should never happen
+                                else:
+                                    invalid = True
+                        if(invalid == False):
+                            rollstring += "\nresulting in: **"+str(counter)+"**"
+                            print(rollstring)
+                        else:
+                            print("some sort of error")
+                    except Exception as e:
+                        print(e)
+                    print(counter)
+                    newHp = targetHp-counter
+                    if(newHp < 0):
+                        newHp = 0
+                        dead = 1
+                        if(target[3]):
+                            executeString = "delete from Tbl_combatCharacter where character_ID = ? and combat_ID = ?"
+                            cursor.execute(executeString, target[0], combatId)
+                        else:
+                            executeString = "delete from Tbl_combatMonster where monster_ID = ? and combat_ID = ?"
+                            cursor.execute(executeString, target[0], combatId)
+
+                    if(target[3]):
+                        cursor.execute(executeString, newHp, target[0])
+                        executeString = "update Tbl_character set currentHp = ? where character_ID = ?"
+                    else:
+                        executeString = "update Tbl_monster set currentHp = ? where monster_ID = ?"
+                        cursor.execute(executeString, newHp, target[0])
+
+
+
+            # try:
+            #     executeString = "select user_ID from Tbl_user where username = ? and password = ?"
+            #     cursor.execute(executeString, self.data[1], self.data[2])
+            #     rows = cursor.fetchall()
+            #     for row in rows:
+            #         userId = row[0]
+            except Exception as e:
+                print("error: " + str(e))
+            self.request.sendall(pickle.dumps([success,counter,dead]))
 
 
 

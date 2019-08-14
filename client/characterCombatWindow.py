@@ -15,7 +15,7 @@ import chooseTargetWindow
 class mainFormDlg(QDialog) :
 
     def diceRoll(self, dice):
-        self.currentDice = dice
+        self.currentAttack = dice
         chooseTargetWindow.mainFormDlg(self).show()
 
 
@@ -46,10 +46,31 @@ class mainFormDlg(QDialog) :
 
     def updateAttackTable(self):
         self.attacksModel.clear()
-        self.attacksModel.setHorizontalHeaderLabels(["Name","Damage"])
+        self.attacksModel.setHorizontalHeaderLabels(["Name","To Hit","Damage"])
         allRows = []
         for i in range(len(self.attacksList)):
 
+            toHit = self.attacksList[i][3]
+            if(self.attacksList[i][2] == 0):
+                # str
+                toHit += calculateAbilities.calcAbility(self.charStr)
+            elif(self.attacksList[i][2] == 1):
+                # dex
+                toHit += calculateAbilities.calcAbility(self.charDex)
+            elif(self.attacksList[i][2] == 2):
+                # con
+                toHit += calculateAbilities.calcAbility(self.charCon)
+            elif(self.attacksList[i][2] == 3):
+                # int
+                toHit += calculateAbilities.calcAbility(self.charInt)
+            elif(self.attacksList[i][2] == 4):
+                # wis
+                toHit += calculateAbilities.calcAbility(self.charWis)
+            elif(self.attacksList[i][2] == 5):
+                # cha
+                toHit += calculateAbilities.calcAbility(self.charCha)
+            if(self.attacksList[i][1]):
+                toHit += self.proficiency
 
             dmg = self.attacksList[i][6]
             if(self.attacksList[i][5] == 0):
@@ -71,7 +92,7 @@ class mainFormDlg(QDialog) :
                 # cha
                 dmg += calculateAbilities.calcAbility(self.charCha)
 
-            currentRow = [self.attacksList[i][0],self.attacksList[i][4]+"+"+str(dmg)]
+            currentRow = [self.attacksList[i][0],"1d20+"+str(toHit),self.attacksList[i][4]+"+"+str(dmg)]
             allRows.append(currentRow)
         for value in allRows:
             row = []
@@ -104,11 +125,9 @@ class mainFormDlg(QDialog) :
             print("error:",e)
 
     def tableClicked(self, a):
-
-        if(a.column() == 1):
-            message = (self.charName+" roll to damage with "+str(self.attacksModel.data(self.attacksModel.index(a.row(),0))))
-            rollStr = self.attacksModel.itemFromIndex(a).text()
-            self.diceRoll(rollStr)
+        message = (self.charName+" roll to damage with "+str(self.attacksModel.data(self.attacksModel.index(a.row(),0))))
+        rollStr = self.attacksModel.itemFromIndex(a).text()
+        self.diceRoll(self.attacksList[a.row()])
 
     def centerOnScreen(self):
         resolution = QDesktopWidget().screenGeometry()
@@ -118,10 +137,10 @@ class mainFormDlg(QDialog) :
     def __init__(self, parent= None) :
         super(mainFormDlg, self).__init__(parent)
         timer = time.perf_counter()
-        self.setGeometry(0, 0, 300, 100)
+        self.setGeometry(0, 0, 300, 300)
 
         self.setWindowIcon(QIcon('images/icon.png'))
-        self.setWindowTitle('Attacks')
+        self.setWindowTitle('Choose an Attack')
         self.centerOnScreen()
 
         self.currentThing = self.parent().currentClickedThing
