@@ -14,20 +14,13 @@ class mainFormDlg(QDialog) :
 
     def raceChanged(self):
         # set minimum value to 8 temporarily so that values can be decreased if needed
-        self.strEdit.setMinimum(8)
-        self.intEdit.setMinimum(8)
-        self.dexEdit.setMinimum(8)
-        self.conEdit.setMinimum(8)
-        self.wisEdit.setMinimum(8)
-        self.chaEdit.setMinimum(8)
-
-        # set minimum value to 17 temporarily so that values can be increased if needed
-        self.strEdit.setMaximum(17)
-        self.intEdit.setMaximum(17)
-        self.dexEdit.setMaximum(17)
-        self.conEdit.setMaximum(17)
-        self.wisEdit.setMaximum(17)
-        self.chaEdit.setMaximum(17)
+        # set maximum value to 17 temporarily so that values can be increased if needed
+        self.strEdit.setrange(8,17)
+        self.intEdit.setRange(8,17)
+        self.dexEdit.setRange(8,17)
+        self.conEdit.setRange(8,17)
+        self.wisEdit.setRange(8,17)
+        self.chaEdit.setRange(8,17)
 
         # subtract the previous racial modifiers from each box
         self.strEdit.setValue(self.strEdit.value() - self.raceStrMod)
