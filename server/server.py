@@ -1141,7 +1141,7 @@ WHERE attack_ID = ?
 
 
         elif(self.data[0] == 35):
-            print("UPDATE COMBAT")
+            print("GET COMBAT")
             try:
                 executeString = "select combat_ID, name from Tbl_combat where game_ID = ?"
                 cursor.execute(executeString, self.data[3])

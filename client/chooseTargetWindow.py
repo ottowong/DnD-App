@@ -96,6 +96,8 @@ class mainFormDlg(QDialog) :
 
         finally:
             self.tcp_client.close()
+            self.close()
+            self.parent().close()
 
 
     def centerOnScreen(self):
